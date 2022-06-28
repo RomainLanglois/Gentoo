@@ -63,7 +63,7 @@ echo "############################################"
 echo "############################################"
 echo "Setting-up make.conf"
 # Pas clair echo à revoir !
-echo "Do you want to download a handmade make.conf file ? (Y/N)"
+echo "Do you want to download a custom make.conf file from gtihub ? (Y/N)"
 read user_choice
 if [[ $user_choice = "Y" ]]
 then
@@ -104,7 +104,9 @@ mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
 mount --make-slave /mnt/gentoo/run
 chroot /mnt/gentoo /bin/bash
-# Execute a script inside the chroot environnment
-# cd /mnt/gentoo/
-# chroot /mnt/gentoo ./post_chroot.sh
+# Execute a script inside the chroot environnment (WIP - TODO: check if it works)
+# mkdir /mnt/gentoo/script
+# cd /mnt/gentoo/script
+# wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
+# chroot /mnt/gentoo/script ./Installation_part2_UEFI_Hardened.sh
 

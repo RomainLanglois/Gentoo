@@ -46,8 +46,7 @@ echo "Please select the kernel:"
 read kernel
 eselect kernel set $kernel
 cd /usr/src/linux
-# Pas clair echo à revoir !
-echo "Do you want to create a generic kernel or use an already exiting one ? (Y/N)"
+echo "Do you want to create a generic kernel or download an already exiting one ? (Y/N)"
 read user_choice
 if [[ $user_choice = "Y" ]]
 then
@@ -138,12 +137,14 @@ echo "Umounting the environment"
 cd
 umount /dev/$boot_partition
 lsblk
-# PB comment continuer un script en sortant de l'environnement chroot
-exit
+echo "Done !"
+echo "########################################"
+echo " Execute the following line to end the instalaltion process and reboot:
 source /etc/profile
 cd
 umount /mnt/gentoo/home
 umount -R /mnt/gentoo
-lsblk
-echo "Done !"
-echo "########################################"
+reboot
+"
+exit
+
