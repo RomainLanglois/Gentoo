@@ -8,6 +8,12 @@ echo "Please enter disk partition where to mount boot (ex: sda2):"
 read boot_partition
 mount /dev/$boot_partition /boot
 emerge-webrsync
+eselect profile list
+echo "Please select your profile:"
+read profile
+eselect profile set $profile
+rm -rf /etc/portage/package.use/
+echo "dev-python/PyQt5 widgets gui" >> /etc/portage/package.use
 emerge --verbose --update --deep --newuse @world 
 echo "Done !"
 echo "########################################"
@@ -15,7 +21,7 @@ echo "########################################"
 echo "########################################"
 echo "Configuring timezone and locale"
 echo "Europe/Paris" > /etc/timezone
-echo "en_US ISO-8859-1" >> /etc/locale.gen
+echo "en_US ISO-8859-1" >> /etc/locale.gen	
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "fr_FR ISO-8859-1" >> /etc/locale.gen
 echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen
@@ -88,12 +94,13 @@ echo "Done !"
 echo "########################################"
 
 echo "########################################"
+# A automatiser !
 blkid
 echo "Please enter UUID for /boot partition:"
 read UUID_boot
-echo "Please enter UUID LUKS for / partition:"
+echo "Please enter UUID LUKS for / partition (vg0-root):"
 read UUID_luks_root
-echo "Please enter UUID LUKS for /home partition:"
+echo "Please enter UUID LUKS for /home partition (vg0-home):"
 read UUID_luks_home
 echo "UUID=$UUID_boot            /boot           vfat            noauto,noatime  1 2" >> /etc/fstab
 echo "UUID=$UUID_luks_root       /               ext4            defaults        0 1" >> /etc/fstab
@@ -103,13 +110,10 @@ echo "########################################"
 
 echo "########################################"
 echo "Installing and configuring the bootloader (grub)"
-rm -rf /etc/portage/package.use/
 echo "sys-boot/grub:2 device-mapper" >> /etc/portage/package.use
 emerge -q sys-boot/grub:2
-blkid | grep -i luks
-echo "Please enter the UUID for the partion holding the LUKS container:"
-read luks_container
-sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=UUID=$luks_container\" keymap=\"fr\"/g" /etc/default/grub
+luks_container=$(blkid | grep -i luks | cut -d " " -f 2)
+sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=$luks_container keymap=fr\"/g" /etc/default/grub
 grub-install --target=x86_64-efi --efi-directory=/boot
 grub-mkconfig -o /boot/grub/grub.cfg
 rc-update add lvm boot
@@ -128,7 +132,26 @@ read username
 useradd -m -G wheel -s /bin/bash $username
 passwd
 passwd $username
+# A valider avec l'installation de SELinux
 echo "%wheel ALL=(ALL:ALL) ALL" >> /etc/sudoers
+echo "Done !"
+echo "########################################"
+
+echo "########################################"
+echo "Configuring clock"
+date
+echo "Please : enter a time (Example : 20:59:00):"
+read time
+date -s "$time"
+hwclock --systohc
+echo "Done !"
+echo "########################################"
+
+echo "########################################"
+echo "Installing auditd"
+emerge -q sys-process/audit
+/etc/init.d/auditd start
+rc-update start auditd 
 echo "Done !"
 echo "########################################"
 
@@ -139,7 +162,7 @@ umount /dev/$boot_partition
 lsblk
 echo "Done !"
 echo "########################################"
-echo " Execute the following line to end the instalaltion process and reboot:
+echo "Execute the following line to end the instalaltion process and reboot:
 source /etc/profile
 cd
 umount /mnt/gentoo/home

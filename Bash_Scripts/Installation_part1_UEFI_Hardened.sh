@@ -55,19 +55,19 @@ echo "############################################"
 echo "Downloading and decompressing Stage3 TarBall"
 cd /mnt/gentoo
 links https://www.gentoo.org/downloads/mirrors/
-tar xpvf stage3-amd64-hardened-openrc-*.tar.xz --xattrs-include='*.*' --numeric-owner
-rm -f stage3-amd64-hardened-openrc-*.tar.xz
+tar xpvf stage3-amd64-hardened-*.tar.xz --xattrs-include='*.*' --numeric-owner
+rm -f stage3-amd64-hardened-*.tar.xz
 echo "Done !"
 echo "############################################"
 
 echo "############################################"
 echo "Setting-up make.conf"
-# Pas clair echo à revoir !
-echo "Do you want to download a custom make.conf file from gtihub ? (Y/N)"
+echo "Do you want to download a custom make.conf file from github ? (Y/N)"
 read user_choice
 if [[ $user_choice = "Y" ]]
 then
 	echo "Going for a custom one !"
+	rm -f /mnt/gentoo/etc/portage/make.conf
 	cd /mnt/gentoo/etc/portage/
 	wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/make.conf
 	sed -i "s#MAKEOPTS=\"\"#MAKEOPTS=\"-j$(nproc)\"#g" $make_file
@@ -103,10 +103,10 @@ mount --rbind /dev /mnt/gentoo/dev
 mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
 mount --make-slave /mnt/gentoo/run
-chroot /mnt/gentoo /bin/bash
-# Execute a script inside the chroot environnment (WIP - TODO: check if it works)
-# mkdir /mnt/gentoo/script
-# cd /mnt/gentoo/script
-# wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
-# chroot /mnt/gentoo/script ./Installation_part2_UEFI_Hardened.sh
+#chroot /mnt/gentoo /bin/bash
+# Execute a script inside the chroot environnment
+mkdir /mnt/gentoo/script
+cd /mnt/gentoo/script
+wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
+chroot /mnt/gentoo/ ./script/Installation_part2_UEFI_Hardened.sh
 
