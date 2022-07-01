@@ -1,6 +1,3 @@
-# Bash one liner to retrieve and format all packages inside the world file
-# while read -r line; do echo "\"$line\""; done < /var/lib/portage/world
-
 ## Add support for the TPM
 TPM_softwares_array=(
 "app-crypt/clevis"
@@ -16,6 +13,9 @@ softwares_array=(
 "sys-apps/usbutils"
 "sys-process/htop"
 "app-arch/lz4"
+"app-misc/ranger"
+"app-editors/vim"
+"media-gfx/feh"
 )
 
 emaint -a sync
