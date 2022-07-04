@@ -23,7 +23,7 @@ emerge -q x11-base/xorg-server x11-base/xorg-drivers
 env-update
 source /etc/profile 
 rc-update add elogind boot
-/etc/init.d/elogind start
+rc-service elogind start
 echo "Done !"
 echo "###########################################"
 

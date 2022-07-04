@@ -150,8 +150,8 @@ echo "########################################"
 echo "########################################"
 echo "Installing auditd"
 emerge -q sys-process/audit
-/etc/init.d/auditd start
-rc-update start auditd 
+rc-update add auditd default
+rc-service auditd start 
 echo "Done !"
 echo "########################################"
 
