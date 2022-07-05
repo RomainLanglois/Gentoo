@@ -9,8 +9,8 @@ LVM Configuration
 
 -------------------
 linux-4.9 Enabling LVM
-Device Drivers  --->
-   Multiple devices driver support (RAID and LVM)  --->
+Under "Device Drivers"
+   Under "Multiple devices driver support (RAID and LVM)"
        <*> Device mapper support
            <*> Crypt target support
            <*> Snapshot target
@@ -29,14 +29,14 @@ LUKS Configuration
 -------------------
 Enabling device mapper and crypt target
 [*] Enable loadable module support
-Device Drivers --->
+Under "Device Drivers"
     [*] Multiple devices driver support (RAID and LVM) --->
         <*> Device mapper support
         <*>   Crypt target support
 
 -------------------
 Enabling cryptographic API functions
-[*] Cryptographic API --->
+Under "Cryptographic API"
     <*> XTS support
     <*> SHA224 and SHA256 digest algorithm
     <*> AES cipher algorithms
@@ -46,17 +46,17 @@ Enabling cryptographic API functions
 
 -------------------
 Enabling initramfs support
-General setup  --->
+Under "General setup"
     [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
 
 -------------------
 Enabling tcrypt (TrueCrypt/tcplay/VeraCrypt compatibility mode) support
-Device Drivers --->
+Under "Device Drivers" 
     [*] Block Devices ---> 
         <*> Loopback device support 
-File systems ---> 
+Under "File systems"
      <*> FUSE (Filesystem in Userspace) support 
-[*] Cryptographic API ---> 
+Under "Cryptographic API" 
      <*> RIPEMD-160 digest algorithm 
      <*> SHA384 and SHA512 digest algorithms 
      <*> Whirlpool digest algorithms 
@@ -74,52 +74,53 @@ SELinux Configuration
 -------------------
 Enabling SELinux
 Under "General setup"
-[*] Auditing support
+	[*] Auditing support
+	[*] Support initial ramdisk/ramfs compressed using lZ4
 Under "File systems"
   (For each file system you use, make sure extended attribute support is enabled)
-<*> Second extended fs support
-[*]   Ext2 extended attributes
-[ ]     Ext2 POSIX Access Control Lists
-[*]     Ext2 Security Labels
-<*> Ext3 journalling file system support
-[*]   Ext3 extended attributes
-[ ]     Ext3 POSIX Access Control Lists
-[*]     Ext3 Security Labels
-<*> The Extended 4 (ext4) filesystem
-[*]   Ext4 extended attributes
-[ ]     Ext4 POSIX Access Control Lists
-[*]     Ext4 Security Labels
-<*> JFS filesystem support
-[ ]   JFS POSIX Access Control Lists
-[*]   JFS Security Labels
-[ ]   JFS debugging
-[ ]   JFS statistics
-<*> XFS filesystem support
-[ ]   XFS Quota support
-[ ]   XFS POSIX ACL support
-[ ]   XFS Realtime subvolume support (EXPERIMENTAL)
-[ ]   XFS Debugging Support
-<*> Btrfs filesystem (EXPERIMENTAL)
+	<*> Second extended fs support
+	[*]   Ext2 extended attributes
+	[ ]     Ext2 POSIX Access Control Lists
+	[*]     Ext2 Security Labels
+	<*> Ext3 journalling file system support
+	[*]   Ext3 extended attributes
+	[ ]     Ext3 POSIX Access Control Lists
+	[*]     Ext3 Security Labels
+	<*> The Extended 4 (ext4) filesystem
+	[*]   Ext4 extended attributes
+	[ ]     Ext4 POSIX Access Control Lists
+	[*]     Ext4 Security Labels
+	<*> JFS filesystem support
+	[ ]   JFS POSIX Access Control Lists
+	[*]   JFS Security Labels
+	[ ]   JFS debugging
+	[ ]   JFS statistics
+	<*> XFS filesystem support
+	[ ]   XFS Quota support
+	[ ]   XFS POSIX ACL support
+	[ ]   XFS Realtime subvolume support (EXPERIMENTAL)
+	[ ]   XFS Debugging Support
+	<*> Btrfs filesystem (EXPERIMENTAL)
 [ ]   Btrfs POSIX Access Control Lists
 
 -------------------
 Under "Security options"
-[*] Enable different security models
-[*] Socket and Networking Security Hooks
-[*] NSA SELinux Support
-[ ]   NSA SELinux boot parameter
-[ ]   NSA SELinux runtime disable
-[*]   NSA SELinux Development Support
-[ ]   NSA SELinux AVC Statistics
-(0)   NSA SELinux checkreqprot default value
-    Default security module (SELinux) --->
+	[*] Enable different security models
+	[*] Socket and Networking Security Hooks
+	[*] NSA SELinux Support
+	[ ]   NSA SELinux boot parameter
+	[ ]   NSA SELinux runtime disable
+	[*]   NSA SELinux Development Support
+	[ ]   NSA SELinux AVC Statistics
+	(0)   NSA SELinux checkreqprot default value
+		Default security module (SELinux) --->
 
 -------------------
 Enabling SELinux
 Under "Security options"
-[*] NSA SELinux Support
-[*]   NSA SELinux boot parameter 
-(1)     NSA SELinux boot parameter default value
+	[*] NSA SELinux Support
+	[*]   NSA SELinux boot parameter 
+	(1)     NSA SELinux boot parameter default value
 ```
 
 ## Hardware configuration (WIP)
@@ -143,4 +144,12 @@ Under "Device Drivers"
 Under "File systems"
 	[] Network File Systems
 	[] Miscellaneous filesystems
+	
+Under "General setup"
+	[] Support initial ramdisk/ramfs compressed using gzip
+	[] Support initial ramdisk/ramfs compressed using gzip2
+	[] Support initial ramdisk/ramfs compressed using LZMA
+	[] Support initial ramdisk/ramfs compressed using XZ
+	[] Support initial ramdisk/ramfs compressed using LZO
+	[] Support initial ramdisk/ramfs compressed using ZSTD
 ```
