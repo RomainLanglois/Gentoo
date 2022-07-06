@@ -1,0 +1,48 @@
+
+module Xorg_user-u_test 1.0;
+
+require {
+	type xserver_t;
+	type user_tmp_t;
+	type user_tmpfs_t;
+	type xauth_tmp_t;
+	type user_t;
+	type dri_device_t;
+	type event_device_t;
+	type xauth_t;
+	type system_dbusd_t;
+	type user_dbusd_t;
+	type boolean_t;
+	type proc_t;
+	type xserver_xdg_data_t;
+	type systemd_logind_t;
+	class file { execute getattr open read unlink write };
+	class filesystem getattr;
+	class fd use;
+	class chr_file { read write };
+	class dir { add_name remove_name search write };
+	class sock_file { create setattr unlink };
+}
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t dri_device_t:chr_file { read write };
+allow system_dbusd_t event_device_t:chr_file { read write };
+
+#============= user_dbusd_t ==============
+allow user_dbusd_t user_tmp_t:dir { add_name remove_name search write };
+allow user_dbusd_t user_tmp_t:sock_file { create setattr unlink };
+allow user_dbusd_t xserver_xdg_data_t:dir search;
+
+#============= user_t ==============
+allow user_t user_tmpfs_t:file execute;
+allow user_t xauth_tmp_t:file unlink;
+
+#============= xauth_t ==============
+allow xauth_t user_tmp_t:file { unlink write };
+
+#============= xserver_t ==============
+allow xserver_t boolean_t:file { open read };
+allow xserver_t proc_t:filesystem getattr;
+allow xserver_t systemd_logind_t:fd use;
+allow xserver_t user_t:file { open read };
+allow xserver_t xauth_tmp_t:file { getattr open read };
