@@ -1,0 +1,26 @@
+module allow_unconfined-user_xorg.te 1.0;
+
+require {
+        type system_dbusd_t;
+        type xauth_t;
+        type dri_device_t;
+        type user_tmp_t;
+        type event_device_t;
+        type unconfined_t;
+        class file { unlink write };
+        class chr_file { read write };
+        class process execmem;
+}
+
+
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t dri_device_t:chr_file { read write };
+allow system_dbusd_t event_device_t:chr_file { read write };
+
+#============= unconfined_t ==============
+allow unconfined_t self:process execmem;
+
+#============= xauth_t ==============
+allow xauth_t user_tmp_t:file { unlink write };
+
