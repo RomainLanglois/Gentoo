@@ -1,112 +1,112 @@
 #!/bin/bash
 make_file=/mnt/gentoo/etc/portage/make.conf
 
-echo "###########################################"
-echo "Formating and encrypting the designated disk"
-lsblk
-echo "Please enter the disk to partition (ex: sda):"
+/bin/echo "###########################################"
+/bin/echo "Fo/bin/rmating and encrypting the designated disk"
+/bin/lsblk
+/bin/echo "Please enter the disk to partition (ex: sda):"
 read disk
-wipefs -a /dev/$disk
+/sbin/wipefs -a /dev/$disk
 
-parted -a optimal /dev/$disk -s 'mklabel gpt'
-parted -a optimal /dev/$disk -s 'unit mib'
-parted -a optimal /dev/$disk -s 'mkpart primary 1 3' 
-parted -a optimal /dev/$disk -s 'name 1 grub'
-parted -a optimal /dev/$disk -s 'set 1 bios_grub on'
-parted -a optimal /dev/$disk -s 'mkpart primary fat32 3 515 '
-parted -a optimal /dev/$disk -s 'name 2 boot'
-parted -a optimal /dev/$disk -s 'set 2 boot on'
-parted -a optimal /dev/$disk -s 'mkpart primary 515 -1'
-parted -a optimal /dev/$disk -s 'name 3 lvm'
-parted -a optimal /dev/$disk -s 'set 3 lvm on'
-parted -a optimal /dev/$disk -s 'print'
+/usr/sbin/parted -a optimal /dev/$disk -s 'mklabel gpt'
+/usr/sbin/parted -a optimal /dev/$disk -s 'unit mib'
+/usr/sbin/parted -a optimal /dev/$disk -s 'mkpart primary 1 3'
+/usr/sbin/parted -a optimal /dev/$disk -s 'name 1 grub'
+/usr/sbin/parted -a optimal /dev/$disk -s 'set 1 bios_grub on'
+/usr/sbin/parted -a optimal /dev/$disk -s 'mkpart primary fat32 3 515 '
+/usr/sbin/parted -a optimal /dev/$disk -s 'name 2 boot'
+/usr/sbin/parted -a optimal /dev/$disk -s 'set 2 boot on'
+/usr/sbin/parted -a optimal /dev/$disk -s 'mkpart primary 515 -1'
+/usr/sbin/parted -a optimal /dev/$disk -s 'name 3 /sbin/lvm'
+/usr/sbin/parted -a optimal /dev/$disk -s 'set 3 /sbin/lvm on'
+/usr/sbin/parted -a optimal /dev/$disk -s 'print'
 
-echo "###########################################"
-echo "Formating encrypting and mounting the luks partition"
-lsblk
-modprobe dm-crypt
-echo "Please enter the partion to encrypt with luks (ex: sda3):"
+/bin/echo "###########################################"
+/bin/echo "Fo/bin/rmating encrypting and /bin/mounting the luks partition"
+/bin/lsblk
+/sbin/modprobe dm-crypt
+/bin/echo "Please enter the partion to encrypt with luks (ex: sda3):"
 read luks_partition
-cryptsetup luksFormat /dev/$luks_partition
-cryptsetup luksOpen /dev/$luks_partition lvm 
-lvm pvcreate /dev/mapper/lvm 
-vgcreate vg0 /dev/mapper/lvm 
-lvcreate -L 40G -n root vg0 
-lvcreate -l 100%FREE -n home vg0
-mkfs.fat -F 32 /dev/$disk\2
-mkfs.ext4 /dev/mapper/vg0-root 
-mkfs.ext4 /dev/mapper/vg0-home 
-mount /dev/mapper/vg0-root /mnt/gentoo
-mkdir /mnt/gentoo/home
-mount /dev/mapper/vg0-home /mnt/gentoo/home
-echo "Done !"
-echo "############################################"
+/sbin/cryptsetup luksFo/bin/rmat /dev/$luks_partition
+/sbin/cryptsetup luksOpen /dev/$luks_partition lvm
+/sbin/lvm pvcreate /dev/mapper/lvm
+/sbin/vgcreate vg0 /dev/mapper/lvm
+/sbin/lvcreate -L 40G -n root vg0
+/sbin/lvcreate -l 100%FREE -n home vg0
+/sbin/mkfs.fat -F 32 /dev/$disk\2
+/sbin/mkfs.ext4 /dev/mapper/vg0-root
+/sbin/mkfs.ext4 /dev/mapper/vg0-home
+/bin/mount /dev/mapper/vg0-root /mnt/gentoo
+/bin/mkdir /mnt/gentoo/home
+/bin/mount /dev/mapper/vg0-home /mnt/gentoo/home
+/bin/echo "Done !"
+/bin/echo "############################################"
 
-echo "############################################"
-echo "Date configuration"
-date
-echo "Please : enter a date (Example : 13 JUN 2022 20:59:00):"
+/bin/echo "############################################"
+/bin/echo "Date configuration"
+/bin/date
+/bin/echo "Please : enter a date (Example : 13 JUN 2022 20:59:00):"
 read date
-date -s "$date"
-echo "Done !"
-echo "############################################"
+/bin/date -s "$date"
+/bin/echo "Done !"
+/bin/echo "############################################"
 
-echo "############################################"
-echo "Downloading and decompressing Stage3 TarBall"
+/bin/echo "############################################"
+/bin/echo "Downloading and decompressing Stage3 TarBall"
 cd /mnt/gentoo
-links https://www.gentoo.org/downloads/mirrors/
-tar xpvf stage3-amd64-hardened-*.tar.xz --xattrs-include='*.*' --numeric-owner
-rm -f stage3-amd64-hardened-*.tar.xz
-echo "Done !"
-echo "############################################"
+/usr/bin/links https://www.gentoo.org/downloads/mirrors/
+/bin/tar xpvf stage3-amd64-hardened-*.tar.xz --xattrs-include='*.*' --numeric-owner
+/bin/rm -f stage3-amd64-hardened-*.tar.xz
+/bin/echo "Done !"
+/bin/echo "############################################"
 
-echo "############################################"
-echo "Setting-up make.conf"
-echo "Do you want to download a custom make.conf file from github ? (Y/N)"
+/bin/echo "############################################"
+/bin/echo "Setting-up make.conf"
+/bin/echo "Do you want to download a custom make.conf file from github ? (Y/N)"
 read user_choice
 if [[ $user_choice = "Y" ]]
 then
-	echo "Going for a custom one !"
-	rm -f /mnt/gentoo/etc/portage/make.conf
+	/bin/echo "Going for a custom one !"
+	/bin/rm -f /mnt/gentoo/etc/portage/make.conf
 	cd /mnt/gentoo/etc/portage/
-	wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/make.conf
-	sed -i "s#MAKEOPTS=\"\"#MAKEOPTS=\"-j$(nproc)\"#g" $make_file
+	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/make.conf
+	/bin/sed -i "s#MAKEOPTS=\"\"#MAKEOPTS=\"-j$(nproc)\"#g" $make_file
 	cd /mnt/gentoo
 else
-	echo "Going for a Generic one !"
-	echo 'COMMON_FLAGS="-march=native -O2 -pipe"' >> $make_file
-	echo 'GRUB_PLATFORMS="efi-64"' >> $make_file
-	echo "MAKEOPTS=\"-j$(nproc)\"" >> $make_file
-	echo 'USE="-systemd -ipv6"' >> $make_file
+	/bin/echo "Going for a Generic one !"
+	/bin/echo 'COMMON_FLAGS="-march=native -O2 -pipe"' >> $make_file
+	/bin/echo 'GRUB_PLATFO/bin/rmS="efi-64"' >> $make_file
+	/bin/echo "MAKEOPTS=\"-j$(nproc)\"" >> $make_file
+	/bin/echo 'USE="-systemd -ipv6"' >> $make_file
 fi
-echo "done !"
-echo "############################################"
+/bin/echo "done !"
+/bin/echo "############################################"
 
-echo "############################################"
-echo "Configuring mirrors"
+/bin/echo "############################################"
+/bin/echo "Configuring mirrors"
 if [[ $user_choice = "N" ]]
 then
-	mirrorselect -i -o >> $make_file
+	/usr/bin/mirrorselect -i -o >> $make_file
 fi
-mkdir --parents etc/portage/repos.conf
-cp usr/share/portage/config/repos.conf etc/portage/repos.conf/gentoo.conf
-cp --dereference /etc/resolv.conf etc/
-echo "done !"
-echo "############################################"
+/bin/mkdir --parents etc/portage/repos.conf
+/bin/cp usr/share/portage/config/repos.conf etc/portage/repos.conf/gentoo.conf
+/bin/cp --dereference /etc/resolv.conf etc/
+/bin/echo "done !"
+/bin/echo "############################################"
 
-echo "############################################"
-echo "Moving inside the chroot !"
-mount --types proc /proc /mnt/gentoo/proc
-mount --rbind /sys /mnt/gentoo/sys
-mount --make-rslave /mnt/gentoo/sys
-mount --rbind /dev /mnt/gentoo/dev
-mount --make-rslave /mnt/gentoo/dev
-mount --bind /run /mnt/gentoo/run
-mount --make-slave /mnt/gentoo/run
-#chroot /mnt/gentoo /bin/bash
-# Execute a script inside the chroot environnment
-mkdir /mnt/gentoo/script
+/bin/echo "############################################"
+/bin/echo "Moving inside the chroot !"
+/bin/mount --types proc /proc /mnt/gentoo/proc
+/bin/mount --rbind /sys /mnt/gentoo/sys
+/bin/mount --make-rslave /mnt/gentoo/sys
+/bin/mount --rbind /dev /mnt/gentoo/dev
+/bin/mount --make-rslave /mnt/gentoo/dev
+/bin/mount --bind /run /mnt/gentoo/run
+/bin/mount --make-slave /mnt/gentoo/run
+/bin/mkdir /mnt/gentoo/script
 cd /mnt/gentoo/script
-wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
-chroot /mnt/gentoo/ ./script/Installation_part2_UEFI_Hardened.sh
+/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
+/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Install_softwares.sh
+/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Install_GUI.sh
+/usr/bin/chroot /mnt/gentoo/ ./script/Installation_part2_UEFI_Hardened.sh
 
