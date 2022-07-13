@@ -12,7 +12,6 @@ softwares_array=(
 "dev-vcs/git"
 "sys-apps/usbutils"
 "sys-process/htop"
-"app-arch/lz4"
 "app-misc/ranger"
 "app-editors/vim"
 "media-gfx/feh"
