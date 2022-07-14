@@ -2,12 +2,11 @@
 make_file=/mnt/gentoo/etc/portage/make.conf
 
 /bin/echo "###########################################"
-/bin/echo "Fo/bin/rmating and encrypting the designated disk"
+/bin/echo "Formating and encrypting the designated disk"
 /bin/lsblk
 /bin/echo "Please enter the disk to partition (ex: sda):"
 read disk
 /sbin/wipefs -a /dev/$disk
-
 /usr/sbin/parted -a optimal /dev/$disk -s 'mklabel gpt'
 /usr/sbin/parted -a optimal /dev/$disk -s 'unit mib'
 /usr/sbin/parted -a optimal /dev/$disk -s 'mkpart primary 1 3'
@@ -17,23 +16,23 @@ read disk
 /usr/sbin/parted -a optimal /dev/$disk -s 'name 2 boot'
 /usr/sbin/parted -a optimal /dev/$disk -s 'set 2 boot on'
 /usr/sbin/parted -a optimal /dev/$disk -s 'mkpart primary 515 -1'
-/usr/sbin/parted -a optimal /dev/$disk -s 'name 3 /sbin/lvm'
-/usr/sbin/parted -a optimal /dev/$disk -s 'set 3 /sbin/lvm on'
+/usr/sbin/parted -a optimal /dev/$disk -s 'name 3 lvm'
+/usr/sbin/parted -a optimal /dev/$disk -s 'set 3 lvm on'
 /usr/sbin/parted -a optimal /dev/$disk -s 'print'
 
 /bin/echo "###########################################"
-/bin/echo "Fo/bin/rmating encrypting and /bin/mounting the luks partition"
+/bin/echo "Formating encrypting and mounting the luks partition"
 /bin/lsblk
 /sbin/modprobe dm-crypt
 /bin/echo "Please enter the partion to encrypt with luks (ex: sda3):"
 read luks_partition
-/sbin/cryptsetup luksFo/bin/rmat /dev/$luks_partition
+/sbin/cryptsetup luksFormat /dev/$luks_partition
 /sbin/cryptsetup luksOpen /dev/$luks_partition lvm
 /sbin/lvm pvcreate /dev/mapper/lvm
 /sbin/vgcreate vg0 /dev/mapper/lvm
 /sbin/lvcreate -L 40G -n root vg0
 /sbin/lvcreate -l 100%FREE -n home vg0
-/sbin/mkfs.fat -F 32 /dev/$disk\2
+/usr/sbin/mkfs.fat -F 32 /dev/$disk\2
 /sbin/mkfs.ext4 /dev/mapper/vg0-root
 /sbin/mkfs.ext4 /dev/mapper/vg0-home
 /bin/mount /dev/mapper/vg0-root /mnt/gentoo
@@ -42,10 +41,11 @@ read luks_partition
 /bin/echo "Done !"
 /bin/echo "############################################"
 
+# Peut être automatisé (juste besoin de l'heure)
 /bin/echo "############################################"
 /bin/echo "Date configuration"
 /bin/date
-/bin/echo "Please : enter a date (Example : 13 JUN 2022 20:59:00):"
+/bin/echo "Please : enter the current date (Example : 13 JUN 2022 20:59:00):"
 read date
 /bin/date -s "$date"
 /bin/echo "Done !"
@@ -75,7 +75,7 @@ then
 else
 	/bin/echo "Going for a Generic one !"
 	/bin/echo 'COMMON_FLAGS="-march=native -O2 -pipe"' >> $make_file
-	/bin/echo 'GRUB_PLATFO/bin/rmS="efi-64"' >> $make_file
+	/bin/echo 'GRUB_PLATFORMS="efi-64"' >> $make_file
 	/bin/echo "MAKEOPTS=\"-j$(nproc)\"" >> $make_file
 	/bin/echo 'USE="-systemd -ipv6"' >> $make_file
 fi
@@ -107,6 +107,7 @@ fi
 cd /mnt/gentoo/script
 /usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Installation_part2_UEFI_Hardened.sh
 /usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Install_softwares.sh
-/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Install_GUI.sh
+/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/Install_GUI_XORG.sh
+# chroot /mnt/gentoo /bin/bash 
 /usr/bin/chroot /mnt/gentoo/ ./script/Installation_part2_UEFI_Hardened.sh
 

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 /bin/echo "########################################"
 /bin/echo "Preparing the environment and emerging @world"
 source /etc/profile
@@ -9,11 +8,11 @@ export PS1="(chroot) ${PS1}"
 read boot_partition
 /bin/mount /dev/$boot_partition /boot
 /usr/bin/emerge-webrsync
-/usr/share/eselect profile list
+/usr/bin/eselect profile list
 /bin/echo "Please select your profile:"
 read profile
-/usr/share/eselect profile set $profile
-/usr/bin/emerge --verbose --up/bin/date --deep --newuse @world
+/usr/bin/eselect profile set $profile
+/usr/bin/emerge --verbose --update --deep --newuse @world
 /bin/echo "Done !"
 /bin/echo "########################################"
 
@@ -25,11 +24,11 @@ read profile
 /bin/echo "fr_FR ISO-8859-1" >> /etc/locale.gen
 /bin/echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen
 /usr/sbin/locale-gen
-/usr/share/eselect locale list
+/usr/bin/eselect locale list
 /bin/echo "Please select your locale:"
 read locale
-/usr/share/eselect locale set $locale
-env-up/bin/date && source /etc/profile && export PS1="(chroot) ${PS1}"
+/usr/bin/eselect locale set $locale
+env-update && source /etc/profile && export PS1="(chroot) ${PS1}"
 /bin/echo "Done !"
 /bin/echo "########################################"
 
@@ -40,18 +39,18 @@ env-up/bin/date && source /etc/profile && export PS1="(chroot) ${PS1}"
 /bin/echo "########################################"
 
 /bin/echo "########################################"
-/bin/echo "Installing / Configuring linux fi/bin/rmware, kernel sources and initramfs"
-/bin/echo "sys-kernel/linux-fi/bin/rmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
+/bin/echo "Installing / Configuring linux firmware, kernel sources and initramfs"
+/bin/echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
 /usr/bin/emerge -q sys-kernel/linux-firmware
 /usr/bin/emerge -q sys-kernel/gentoo-sources
 /usr/bin/emerge -q sys-fs/cryptsetup sys-fs/lvm2
 /usr/bin/emerge -q app-arch/lz4
-/usr/share/eselect kernel list
+/usr/bin/eselect kernel list
 /bin/echo "Please select the kernel:"
 read kernel
-/usr/share/eselect kernel set $kernel
+/usr/bin/eselect kernel set $kernel
 cd /usr/src/linux
-/bin/echo "Do you want to create a generic kernel or download an already exiting one ? (Y/N)"
+/bin/echo "Do you want to create a generic kernel ? (Y/N)"
 read user_choice
 if [[ $user_choice = "Y" ]]
 then
@@ -80,19 +79,15 @@ fi
 /bin/echo "Done !"
 /bin/echo "########################################"
 
-/bin/echo "########################################"
-# TODO à automatiser !
-# ip a | grep UP | grep -v lo | cut -d ":" -f2
-/bin/ip a
-/bin/echo "DHCP configuration : please enter network interface:"
-read network_interface
+/bin/echo "########################################" 
+/bin/echo "DHCP configuration:"
+network_interface=$(/bin/ip a | /bin/grep -i up | /bin/grep -v lo | /usr/bin/cut -d ":" -f2 | sed 's/ //g')
 /usr/bin/emerge --noreplace --quiet net-misc/netifrc
-/bin/echo 'config_'$network_interface="dhcp" >> /etc/conf.d/net
+/bin/echo "config_$network_interface=dhcp" >> /etc/conf.d/net
 /usr/bin/emerge -q net-misc/dhcpcd
 cd /etc/init.d
-/bin/ln -s net.lo net.$network_interface
-/sbin/rc-up/bin/date add net.$network_interface default
-# TODO
+/bin/ln -s net.lo "net.$network_interface"
+/sbin/rc-update add "net.$network_interface" default
 /bin/echo "Done !"
 /bin/echo "########################################"
 
@@ -124,7 +119,7 @@ luks_container=$(/sbin/blkid | /bin/grep -i luks | /usr/bin/cut -d " " -f 2)
 read box_name
 /bin/sed -i "s/hostname=\"localhost\"/hostname=\'$box_name\'/g" /etc/conf.d/hostname
 /usr/bin/emerge -q app-admin/sudo
-/bin/echo "Please enter the username which will be u/bin/sed for this system:"
+/bin/echo "Please enter the username which will be used for this system:"
 read username
 /usr/sbin/useradd -m -G wheel -s /bin/bash $username
 /usr/bin/passwd
@@ -133,6 +128,7 @@ read username
 /bin/echo "Done !"
 /bin/echo "########################################"
 
+# TODO à automatiser ! (peut être retirer la partie de modification de la date déjà fait auparavant)
 /bin/echo "########################################"
 /bin/echo "Configuring clock"
 /bin/date
@@ -142,11 +138,12 @@ read time
 /sbin/hwclock --systohc
 /bin/echo "Done !"
 /bin/echo "########################################"
+# TODO
 
 /bin/echo "########################################"
 /bin/echo "Installing auditd"
 /usr/bin/emerge -q sys-process/audit
-/sbin/rc-up/bin/date add auditd default
+/sbin/rc-update add auditd default
 /sbin/rc-service auditd start
 /bin/echo "Done !"
 /bin/echo "########################################"
@@ -166,4 +163,3 @@ cd
 /sbin/reboot
 "
 exit
-
