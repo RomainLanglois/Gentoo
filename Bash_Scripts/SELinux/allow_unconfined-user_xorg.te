@@ -1,4 +1,4 @@
-module allow_unconfined-user_xorg.te 1.0;
+module allow_unconfined-user_xorg 1.0;
 
 require {
         type system_dbusd_t;
