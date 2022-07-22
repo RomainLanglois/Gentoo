@@ -119,4 +119,4 @@ for script in ${scripts_array[@]}; do
 	  /bin/echo -e "${GREEN}[*] Script: $script correctly downloaded and configured ! ${NC}"	
 done
 # chroot /mnt/gentoo /bin/bash 
-/usr/bin/chroot /mnt/gentoo/ ./script/Installation_part2_UEFI_Hardened.sh
+/usr/bin/chroot /mnt/gentoo/ ./scripts/Installation_part2_UEFI_Hardened.sh
