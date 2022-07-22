@@ -47,10 +47,9 @@ source /etc/profile && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
-# TODO 
-# Rajouter Brave
 /bin/echo "###########################################"
 /bin/echo "[*] Installing other critical components for the GUI to work"
+/bin/echo "media-plugins/alsa-plugins pulseaudio" >> /etc/portage/package.use && \
 /usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-terms/terminator www-client/firefox-bin media-gfx/feh && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
@@ -76,6 +75,7 @@ cd /tmp && \
 /bin/cp $git_tmp_folder/config $i3_config_folder && \
 /bin/cp -r $git_tmp_folder/scripts $i3_config_folder && \
 /bin/cp -r $git_tmp_folder/wallpaper $i3_config_folder && \
+/bin/chown -R toto:toto $user_folder/.config && \
 /bin/rm -rf $git_tmp_folder && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
@@ -110,7 +110,7 @@ if [[ $user_choice == "Y" ]];
 then
 	/bin/echo "[*] Rebooting in 5 seconds..."
 	/usr/bin/sleep 5
-	/usr/sbin/reboot
+	/sbin/reboot
 else
 	/bin/echo "[*] Exiting script"
 fi

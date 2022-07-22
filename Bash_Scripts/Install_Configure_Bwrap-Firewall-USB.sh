@@ -14,7 +14,7 @@ bwrap_profiles_array=(
 install_and_configure_bwrap ()
 {
 	/bin/echo "[*] Installing bubblewrap"
-	/usr/bin/emerge --ask sys-apps/bubblewrap && \
+	/usr/bin/emerge -q sys-apps/bubblewrap && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}"
 	/bin/echo "[*] Downloading and configuring bubblewrap profiles"
 	for bwrap_profiles in ${bwrap_profiles_array[@]}; do
@@ -48,7 +48,7 @@ install_and_configure_usb-guard ()
 {
 	/bin/echo "[*] Installing and configuring usbguard in version 1.1.1-r3 !"
 	/bin/echo '=sys-apps/usbguard-1.1.1-r3 ~amd64' > /etc/portage/package.accept_keywords/usbguard && \
-	/usr/bin/emerge --ask sys-apps/usbguard && \
+	/usr/bin/emerge -q sys-apps/usbguard && \
 	/usr/bin/usbguard generate-policy > /etc/usbguard/rules.conf && \
 	/sbin/rc-update add usbguard default && \
 	/sbin/rc-service usbguard start && \

@@ -14,7 +14,7 @@ install_and_configure_selinux ()
 	FEATURES="-selinux -sesandbox" /usr/bin/emerge -1 selinux-base && \
 	FEATURES="-selinux -sesandbox" /usr/bin/emerge -1 selinux-base-policy && \
 	/usr/bin/emerge -uDN @world && \
-	/bin/echo -e "${GREEN} Done ! ${NC}"
+	/bin/echo -e "${GREEN}[*] Done ! ${NC}"
 }
 
 label_system ()
@@ -28,7 +28,7 @@ label_system ()
 	/usr/sbin/setfiles -r /mnt/gentoo /etc/selinux/strict/contexts/files/file_contexts /mnt/gentoo/{dev,home,proc,run,sys,tmp} && \
 	/bin/umount /mnt/gentoo && \
 	/usr/sbin/rlpkg -a -r && \
-	/bin/rm -rf /mnt/gentoo && \
+	/bin/rmdir /mnt/gentoo && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}"
 }
 
@@ -43,7 +43,7 @@ define_selinux_users ()
 		/bin/echo -e "[*] Configuring root account"
 		/usr/sbin/semanage login -a -s unconfined_u root && /sbin/restorecon -R -F /root
 		/bin/echo -e "${GREEN}[*] Configuring local unpriviledge account ${NC}"
-		/bin/echo -e "[*] Enter the linux username:"
+		/bin/echo -e "[?] Enter the linux username:"
 		read linux_username
 		/usr/sbin/semanage login -a -s unconfined_u $linux_username && /sbin/restorecon -R -F /home/$linux_username && /bin/echo -e "${GREEN}Done ! ${NC}"	
 	elif [[ $policy_type == "strict" ]];
@@ -52,9 +52,9 @@ define_selinux_users ()
 		/bin/echo -e "[*] Configuring root account ${NC}"
 		/usr/sbin/semanage login -a -s root root && /sbin/restorecon -R -F /root
 		/bin/echo -e "${GREEN}[*] Configuring local unpriviledge account ${NC}"
-		/bin/echo -e "[*] Enter the linux username:"
+		/bin/echo -e "[?] Enter the linux username:"
 		read linux_username
-		/bin/echo -e "[*] Enter the corresponding SELinux account:"
+		/bin/echo -e "[?] Enter the corresponding SELinux account:"
 		read selinux_username
 		/usr/sbin/semanage login -a -s $selinux_username $linux_username && /sbin/restorecon -R -F /home/$linux_username && /bin/echo -e "${GREEN}Done ! ${NC}"
 	else
@@ -69,12 +69,24 @@ define_selinux_users ()
 		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1)
 	fi
 	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
-	/bin/echo -e "${GREEN}Done !${NC}"
+	/bin/echo -e "${GREEN}[*] Done !${NC}"
+	/bin/echo "[*] You need to restart your system to apply kernel parameter selinux=1"
+	/bin/echo "[?] Are you ready to restart (Y/N) ?"
+	read user_choice
+	if [[ $user_choice == "Y" ]];
+	then
+		/bin/echo "[*] Your system will reboot in five seconds..."
+		/bin/sleep 5
+		/sbin/reboot
+	else
+		/bin/echo "[*] The user is not ready to restart existing !"
+		exit 0
+	fi
 }
 
 if [[ "$EUID" -ne 0 ]];
   then 
-  /bin/echo -e "${RED}[*] Please run this script as root ${NC}"
+  /bin/echo "${RED}[*] Please run this script as root ${NC}"
   exit 1
 fi
 
@@ -85,7 +97,7 @@ fi
 /bin/echo -e "2) Make sure your kernel support SELinux !!!!"
 /bin/echo -e "---------------------------------------------------------"
 
-/bin/echo -e "[*] Are you sure you want to continue ? (Y/N)"
+/bin/echo -e "[?] Are you sure you want to continue ? (Y/N)"
 read user_choice
 if [[ $user_choice != "Y" ]];
 then
@@ -98,11 +110,11 @@ then
 	/bin/echo -e "${GREEN}[*] Entering SELinux configuration PHASE 1 ! ${NC}"
 	/bin/echo -e "[*] Showing current profile:"
 	/usr/bin/eselect profile list
-	/bin/echo -e "[*] Do you need to move to the hardened SELinux profile ? (Y/N)"
+	/bin/echo -e "[?] Do you need to move to the hardened SELinux profile ? (Y/N)"
 	read user_choice
 	if [[ $user_choice == "Y" ]];
 	then
-		/bin/echo -e "Select the profile number:"
+		/bin/echo -e "[?] Select the profile number:"
 		read profile_number
 		/usr/bin/eselect profile set $profile_number
 	fi
@@ -110,27 +122,28 @@ then
 	if [[ ! $(/bin/grep -i "POLICY_TYPES" $make_file) ]];
 	then
 		/bin/echo -e "[*] No POLICY_TYPES found inside make file, adding one..."
-		/bin/echo -e 'POLICY_TYPES="strict targeted\"' >> $make_file && \
+		/bin/echo -e 'POLICY_TYPES="strict targeted"' >> $make_file && \
 		/bin/echo -e "${GREEN}[*] Done !${NC}"
 	fi
 
 	/bin/echo -e "[*] Installing SELinux base package"
 	/bin/echo "dev-python/PyQt5 widgets gui" >> $package_use_file && \
 	/bin/echo "dev-libs/libpcre2 static-libs" >> $package_use_file && \
+	/bin/echo "sys-libs/libselinux python" >> $package_use_file && \
+	/bin/echo "sys-process/audit python" >> $package_use_file && \
 	FEATURES="-selinux" /usr/bin/emerge -1 selinux-base && \
 	/bin/echo -e "${GREEN}[*] Done !${NC}"
-	
 	/bin/echo "${GREEN}[*] You need to restart your system before continuing ${NC}"
 	/bin/echo "${GREEN}[*] Preparing the environment... ${NC}"
 	/usr/bin/touch $check_if_system_has_rebooted && \
-	/bin/sed -i "s#dolvm crypt_root=UUID=$(blkid | grep -i luks | cut -d '"' -f2) keymap=fr#dolvm crypt_root=UUID=$(blkid | grep -i luks | cut -d '"' -f2) keymap=fr selinux=0#g" /etc/default/grub
+	/bin/sed -i "s#dolvm crypt_root=UUID=\"$(blkid | grep -i luks | cut -d '"' -f2)\" keymap=fr#dolvm crypt_root=UUID=\"$(blkid | grep -i luks | cut -d '"' -f2)\" keymap=fr selinux=0#g" /etc/default/grub
 	if [[ ! $(lsblk | grep -i boot) ]];
 	then
 		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1)
 	fi
 	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
 	/bin/echo "[*] You will need to re-execute this script to finish the installation process"
-	/bin/echo "[*] are you ready to restart (Y/N) ?"
+	/bin/echo "[?] Are you ready to restart (Y/N) ?"
 	read user_choice
 	if [[ $user_choice == "Y" ]];
 	then
@@ -145,30 +158,26 @@ then
 elif [[ -f $check_if_system_has_rebooted ]] ;
 then
 	/bin/echo -e "${GREEN}[*] Entering SELinux configuration PHASE 2 ! ${NC}"
-	/bin/rm $check_if_system_has_rebooted
 	/bin/echo -e "[*] Do you want to configure SELinux in Targeted mode (1) or Strict mode (2) ?"
 	read user_choice
 	if  [[ $user_choice == 1 ]];
 	then
 		/bin/echo -e "[*] Setting USE variable:"
-		# PB avec le USE flag peer_perms
-		# ERROR: Use flag "peer_perms" is not defined in use.desc and should not be added to make.conf.
-		# Pas eu de problème sur KVM ubuntu
-		/usr/bin/euse -E peer_perms && \
 		/usr/bin/euse -E ubac && \
 		/usr/bin/euse -E unconfined && \
 		/bin/sed -i "s#SELINUXTYPE=strict#SELINUXTYPE=targeted#g" $selinux_config_file && \
 		install_and_configure_selinux && label_system && define_selinux_users targeted
+		/bin/rm $check_if_system_has_rebooted
 	elif [[ $user_choice == 2 ]];
 	then
 		/bin/echo -e "[*] Setting USE variable:"
-		/usr/bin/euse -E peer_perms && \ 
 		/usr/bin/euse -E ubac && \ 
 		install_and_configure_selinux && label_system && define_selinux_users strict
+		/bin/rm $check_if_system_has_rebooted
 	else
 		/bin/echo -e "${RED}No mode selected or invalid input, exiting..."
-		/bin/echo -e "${RED}Choice : Targeted -> 1"
-		/bin/echo -e "${RED}Choice : Strict -> 2 ${NC}"
+		/bin/echo -e "Choice : Targeted -> 1"
+		/bin/echo -e "Choice : Strict -> 2 ${NC}"
 		exit 1
 	fi
 else
