@@ -49,7 +49,6 @@ read luks_partition
 /bin/echo "[*] Done !"
 /bin/echo "############################################"
 
-# Peut être automatisé (juste besoin de l'heure)
 /bin/echo "############################################"
 /bin/echo "[*] Date configuration"
 /bin/date
@@ -118,5 +117,11 @@ for script in ${scripts_array[@]}; do
 	  /bin/chmod +x /mnt/gentoo/scripts/$script && \
 	  /bin/echo -e "${GREEN}[*] Script: $script correctly downloaded and configured ! ${NC}"	
 done
+cd /mnt/gentoo/scripts && /usr/bin/git clone https://github.com/RomainLanglois/I3-configuration.git
 # chroot /mnt/gentoo /bin/bash 
 /usr/bin/chroot /mnt/gentoo/ ./scripts/Installation_part2_UEFI_Hardened.sh
+source /etc/profile
+cd
+/bin/umount /mnt/gentoo/home
+/bin/umount -R /mnt/gentoo
+/sbin/reboot

@@ -128,7 +128,12 @@ read username
 /bin/echo "[*] Done !"
 /bin/echo "########################################"
 
-# TODO Pb avec la date
+/bin/echo "########################################"
+/bin/echo "[*] Removing annoying beep sound"
+/bin/sed -i "s#\# set bell-style none#set bell-style none#g" /etc/inputrc
+/bin/echo "[*] Done !"
+/bin/echo "########################################"
+
 /bin/echo "########################################"
 /bin/echo "[*] Configuring clock"
 /bin/date
@@ -138,7 +143,6 @@ read time
 /sbin/hwclock --systohc
 /bin/echo "[*] Done !"
 /bin/echo "########################################"
-# TODO
 
 /bin/echo "########################################"
 /bin/echo "[*] Installing auditd"
@@ -155,12 +159,3 @@ cd
 /bin/lsblk
 /bin/echo "[*] Done !"
 /bin/echo "########################################"
-# TODO : a déplacer dans le 1er script d'install en fin ?
-/bin/echo "[*] Execute the following line to end the instalaltion process and reboot:
-source /etc/profile
-cd
-/bin/umount /mnt/gentoo/home
-/bin/umount -R /mnt/gentoo
-/sbin/reboot
-"
-exit
