@@ -13,3 +13,8 @@
 - Use specific flag for your compiler to optimize the compilation process for your architecture
 - Be prepare to debug and RESCUE a broken system !
 	- Reinstall a system == RECOMPILE everything !!
+	
+# TODO
+- Install and configure secure boot
+- Customize and upload the kernel config file
+		- Create a script which handles this process
