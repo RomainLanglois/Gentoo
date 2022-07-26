@@ -16,6 +16,7 @@ softwares_array=(
 "sys-process/htop"
 "app-misc/ranger"
 "app-editors/vim"
+"app-shells/zsh"
 )
 
 if [[ "$EUID" -ne 0 ]];
