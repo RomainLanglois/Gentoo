@@ -66,7 +66,7 @@ define_selinux_users ()
 	/bin/sed -i "s#selinux=0#selinux=1#g" /etc/default/grub
 	if [[ ! $(lsblk | grep -i boot) ]];
 	then
-		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1)
+		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1) /boot
 	fi
 	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
 	/bin/echo -e "${GREEN}[*] Done !${NC}"
@@ -118,6 +118,13 @@ then
 		read profile_number
 		/usr/bin/eselect profile set $profile_number
 	fi
+	
+	# Check if the hardened/selinux profile has been correctly set
+	if [[ ! eselect profile list | grep "*" | grep -i "hardened/selinux" ]]
+	then
+		/bin/echo -e "${RED}[*] The profile has not been set correctly ! Exiting... ${NC}"
+		exit 1
+	fi
 
 	if [[ ! $(/bin/grep -i "POLICY_TYPES" $make_file) ]];
 	then
@@ -139,7 +146,7 @@ then
 	/bin/sed -i "s#dolvm crypt_root=UUID=\"$(blkid | grep -i luks | cut -d '"' -f2)\" keymap=fr#dolvm crypt_root=UUID=\"$(blkid | grep -i luks | cut -d '"' -f2)\" keymap=fr selinux=0#g" /etc/default/grub
 	if [[ ! $(lsblk | grep -i boot) ]];
 	then
-		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1)
+		/bin/mount $(blkid | grep -i boot | cut -d ":" -f1) /boot
 	fi
 	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg
 	/bin/echo "[*] You will need to re-execute this script to finish the installation process"
