@@ -17,6 +17,7 @@ softwares_array=(
 "app-misc/ranger"
 "app-editors/vim"
 "app-shells/zsh"
+"sys-fs/ntfs3g"
 )
 
 if [[ "$EUID" -ne 0 ]];
