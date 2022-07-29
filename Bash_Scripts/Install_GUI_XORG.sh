@@ -19,13 +19,13 @@ then
 	/bin/echo "INPUT_DEVICES=\"libinput synaptics\"" >> $make_file
 	/bin/echo "VIDEO_CARDS=\"intel\"" >> $make_file
 else
-	/bin/echo "[*] No modifications added the make.conf file"
+	/bin/echo "[*] No modifications added to make.conf file"
 fi
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
 /bin/echo "###########################################"
-/bin/echo "[*] Remerging the packages which needs those USE flags"
+/bin/echo "[*] Updating @world variable"
 /usr/bin/emerge --ask --changed-use --deep @world && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
@@ -48,41 +48,17 @@ source /etc/profile && \
 /bin/echo "###########################################"
 
 /bin/echo "###########################################"
-/bin/echo "[*] Installing other critical components for the GUI to work"
+/bin/echo "[*] Installing other GUI components"
 /bin/echo "media-plugins/alsa-plugins pulseaudio" >> /etc/portage/package.use && \
-/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-terms/terminator www-client/firefox-bin media-gfx/feh && \
-/bin/echo "[*] Done !"
-/bin/echo "###########################################"
-
-/bin/echo "###########################################"
-/bin/echo "[*] Please enter the username who will receive the GUI configuration: "
-read username
-user_folder=/home/$username
-/bin/echo "###########################################"
-/bin/echo "[*] Configuring .xinitrc file"
-/bin/echo "exec i3" >> $user_folder/.xinitrc && \
-/bin/echo "[*] Done !"
-/bin/echo "###########################################"
-
-/bin/echo "###########################################"
-/bin/echo "[*] Configuring i3"
-i3_config_folder=$user_folder/.config/i3
-git_tmp_folder=/tmp/I3-configuration
-/bin/mkdir $user_folder/.config && \
-/bin/mkdir $user_folder/.config/i3 && \
-cd /tmp && \
-/usr/bin/git clone https://github.com/RomainLanglois/I3-configuration.git && \
-/bin/cp $git_tmp_folder/config $i3_config_folder && \
-/bin/cp -r $git_tmp_folder/scripts $i3_config_folder && \
-/bin/cp -r $git_tmp_folder/wallpaper $i3_config_folder && \
-/bin/chown -R toto:toto $user_folder/.config && \
-/bin/rm -rf $git_tmp_folder && \
+/bin/echo "app-text/poppler cairo" >> /etc/portage/package.use && \
+/bin/echo "app-crypt/gcr gtk" >> /etc/portage/package.use && \
+/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
 /bin/echo "###########################################"
 /bin/echo "[*] Install and configure alsa (Sound)"
-/usr/bin/emerge --ask media-sound/alsa-utils && \
+/usr/bin/emerge -q media-sound/alsa-utils && \
 /sbin/rc-service alsasound start && \
 /sbin/rc-update add alsasound boot && \
 /usr/bin/amixer set Master toggle && \
@@ -114,9 +90,3 @@ then
 else
 	/bin/echo "[*] Exiting script"
 fi
-
-: '
-
-'
-
-
