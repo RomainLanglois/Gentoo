@@ -63,33 +63,26 @@ then
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 	/bin/echo "########################################"
 else
-	## Ne pas utiliser cette partie, NON fonctionnel !!!
-	## TODO 
-	/bin/echo "[*] Downloading a custom kernel from github"
-	/usr/bin/emerge -q sys-kernel/genkernel && \
+	/bin/echo "[*] Downloading custom kernel from github"
+	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/kernel/initramfs -O /usr/src/linux/usr/initramfs_data.cpio && \
+	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/kernel/config -O /usr/src/linux/.config && \
 	cd /usr/src/linux && \
-	# l'initramfs est déjà harcodé dans la config du kernel !!!
-	wget initramfs_data.cpio && \
-	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/config_kernel_XXXX.config && \
-	/bin/mv config_kernel_*.config .config && \
-	/usr/bin/genkernel --luks --lvm --kernel-config=/usr/src/linux/.config --no-compress-initramfs initramfs && \
-	mv vmlinuz-5.15.52-gentoo-x86_64 initramfs_data.cpio && \
-	make -j$(nproc) && make modules_install && make install && \
+	/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 	/bin/echo "########################################"
-	## TODO
 fi
 
 /bin/echo "########################################" 
 /bin/echo "[*] DHCP configuration:"
-network_interface=$(/bin/ip a | /bin/grep -i up | /bin/grep -v lo | /usr/bin/cut -d ":" -f2 | sed 's/ //g')
 /usr/bin/emerge --noreplace --quiet net-misc/netifrc && \
-/bin/echo "config_$network_interface=dhcp" >> /etc/conf.d/net && \
 /usr/bin/emerge -q net-misc/dhcpcd && \
-cd /etc/init.d && \
-/bin/ln -s net.lo "net.$network_interface" && \
-/sbin/rc-update add "net.$network_interface" default && \
-/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
+for network_interface in $(/bin/ip a | /bin/grep -i up | /bin/grep -v lo | /usr/bin/cut -d ":" -f2 | sed 's/ //g'); do
+	/bin/echo "config_$network_interface=dhcp" >> /etc/conf.d/net && \
+	cd /etc/init.d && \
+	/bin/ln -s net.lo "net.$network_interface" && \
+	/sbin/rc-update add "net.$network_interface" default && \
+	/bin/echo -e "${GREEN}[*] Configuration for $network_interface done ! ${NC}"
+done
 /bin/echo "########################################"
 
 /bin/echo "########################################"
@@ -108,19 +101,42 @@ cd /etc/init.d && \
 read user_choice
 if [[ $user_choice == "Y" ]]
 then
-	/bin/echo "########################################"
-	/bin/echo "[*] Installing and configuring EFI stub"
-	/usr/bin/emerge -q sys-boot/efibootmgr && \
-	/bin/mkdir -p /boot/efi/gentoo /boot/efi/gentoo/rescue && \
-	/bin/cp /boot/vmlinuz-$(uname -r) /boot/efi/gentoo/bzImage-$(uname -r).efi && \
-	/bin/echo "[*] Generating a EFI stub rescue" && \
-	/bin/cp /boot/vmlinuz-$(uname -r) /boot/efi/gentoo/rescue/bzImage-$(uname -r).efi && \
-	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
-	/bin/echo "[*] Creating EFI stub entries" && \
-	/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo" --loader "\efi\gentoo\bzImage-$(uname -r).efi" && \
-	/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo_rescue" --loader "\efi\gentoo\rescue\bzImage-$(uname -r).efi" && \
-	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
-	/bin/echo "########################################"
+	# Check if kernel is able to handle EFI stub, kernel initramfs and parameters are correctly configured
+	if [[ $(grep -i "CONFIG_EFI=y" /usr/src/linux/.config) ]] && \
+	   [[ $(grep -i "CONFIG_EFI_STUB=y" /usr/src/linux/.config) ]] && \
+	   [[ $(grep -i 'CONFIG_INITRAMFS_SOURCE="/usr/src/linux/usr/initramfs_data.cpio"' /usr/src/linux/.config) ]] && \
+	   [[ $(grep -i "CONFIG_CMDLINE_BOOL=y" /usr/src/linux/.config) ]] && \
+	   [[ $(grep -i 'CONFIG_CMDLINE="root=/dev/mapper/vg0-root ro dolvm crypt_root=/dev/sda2 keymap=fr"' /usr/src/linux/.config) ]]
+	then
+		/bin/echo "########################################"
+		/bin/echo "[*] Installing and configuring EFI stub"
+		/usr/bin/emerge -q sys-boot/efibootmgr && \
+		/bin/mkdir -p /boot/efi/gentoo /boot/efi/gentoo/rescue && \
+		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/bzImage-$(uname -r).efi && \
+		/bin/echo "[*] Generating a EFI stub rescue" && \
+		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/rescue/bzImage-$(uname -r).efi && \
+		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
+		/bin/echo "[*] Creating EFI stub entries" && \
+		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo" --loader "\efi\gentoo\bzImage-$(uname -r).efi" && \
+		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo_rescue" --loader "\efi\gentoo\rescue\bzImage-$(uname -r).efi" && \
+		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
+		/bin/echo "########################################"
+	else
+		/bin/echo "[*] Your kernel is not compatible with a EFI stub and a harcoded initramfs, going for Grub !"
+		/bin/echo "########################################"
+		/bin/echo "[*] Installing and configuring Grub"
+		/bin/rm -rf /etc/portage/package.use/ && \
+		/bin/echo "sys-boot/grub:2 device-mapper" >> /etc/portage/package.use && \
+		/usr/bin/emerge -q sys-boot/grub:2 && \
+		luks_container=$(/sbin/blkid | /bin/grep -i luks | /usr/bin/cut -d " " -f 2) && \
+		/bin/sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=$luks_container keymap=fr\"/g" /etc/default/grub && \
+		/usr/sbin/grub-install --target=x86_64-efi --efi-directory=/boot && \
+		/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg && \
+		/sbin/rc-update add lvm boot && \
+		/sbin/rc-update add dmcrypt boot && \
+		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
+		/bin/echo "########################################"
+	fi
 else
 	/bin/echo "########################################"
 	/bin/echo "[*] Installing and configuring Grub"
