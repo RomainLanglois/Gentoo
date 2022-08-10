@@ -103,7 +103,6 @@ Under "File systems"
 	<*> Btrfs filesystem (EXPERIMENTAL)
 [ ]   Btrfs POSIX Access Control Lists
 
--------------------
 Under "Security options"
 	[*] Enable different security models
 	[*] Socket and Networking Security Hooks
@@ -115,12 +114,44 @@ Under "Security options"
 	(0)   NSA SELinux checkreqprot default value
 		Default security module (SELinux) --->
 
--------------------
-Enabling SELinux
 Under "Security options"
 	[*] NSA SELinux Support
 	[*]   NSA SELinux boot parameter 
 	(1)     NSA SELinux boot parameter default value
+
+
+-------------------
+-------------------
+EFI stub configuration
+-------------------
+-------------------
+
+-------------------
+Enable EFI stub kernel
+Under "Processor type and features"
+    [*] EFI runtime service support 
+    [*]   EFI stub support
+    [*] Built-in kernel command line
+	    (root=/dev/mapper/vg0-root ro dolvm crypt_root=/dev/sda2 keymap=fr)
+
+Under "General setup"
+	[*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+	    (/usr/src/linux/usr/initramfs_data.cpio) Initramfs source file(s)
+
+
+-------------------
+-------------------
+Enable wifi configuration
+-------------------
+-------------------
+
+-------------------
+Enable Kernel Wifi
+Under "Networking support"
+	Under "Networking options"
+        <*> Packet socket
+    Under "Wireless"
+        <*> cfg80211 - wireless configuration API
 ```
 
 ## Hardware configuration (WIP)
