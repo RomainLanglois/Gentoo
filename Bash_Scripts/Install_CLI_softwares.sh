@@ -18,6 +18,9 @@ softwares_array=(
 "app-editors/vim"
 "app-shells/zsh"
 "sys-fs/ntfs3g"
+"dev-util/ltrace"
+"dev-util/strace" 
+"app-arch/p7zip" 
 )
 
 if [[ "$EUID" -ne 0 ]];
