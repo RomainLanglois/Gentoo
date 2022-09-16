@@ -6,11 +6,11 @@ NC='\033[0m' # No colors
 
 script_github_path=https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/
 scripts_array=(
-	"Installation_part2_UEFI_Hardened.sh"
-	"Install_GUI_XORG.sh"
-	"Install_CLI_softwares.sh"
-	"Install_Configure_Bwrap-Firewall-USB.sh"
-	"Install_and_configure_secureBoot.sh"
+	"01-Installation_part2_UEFI_Hardened.sh"
+	"02-Install_CLI_softwares.sh"
+	"03-Install_Configure_Bwrap-Firewall-USB.sh"
+	"04-Install_and_configure_secureBoot.sh"
+	"05-Install_GUI_XORG.sh"
 )
 make_file=/mnt/gentoo/etc/portage/make.conf
 
