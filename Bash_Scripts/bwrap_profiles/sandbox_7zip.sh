@@ -1,12 +1,13 @@
-#!/bin/sh
-(exec bwrap \
---ro-bind /lib/x86_64-linux-gnu /lib/x86_64-linux-gnu \
---ro-bind /usr/lib /usr/lib \
---symlink /lib/x86_64-linux-gnu /lib64 \
---dev /dev \
---bind /tmp /tmp \
---unshare-all \
---hostname 7zip \
---new-session \
---unsetenv XAUTHORITY \
-/usr/lib/p7zip/7za "$@")
+#!/bin/bash
+exec bwrap \
+	--ro-bind /usr/lib64/p7zip/7za /usr/lib64/p7zip/7za \
+	--ro-bind /usr/lib /usr/lib \
+	--ro-bind /lib64 /lib64 \
+	--ro-bind /etc /etc \
+	--dev /dev \
+	--bind ~/Documents/archives ~ \
+	--unshare-all \
+	--hostname p7zip \
+	--unsetenv XAUTHORITY \
+	--new-session \
+/usr/lib64/p7zip/7za "$@"

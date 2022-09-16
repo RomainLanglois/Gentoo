@@ -6,7 +6,7 @@ exec bwrap \
      --ro-bind /usr/lib /usr/lib \
      --ro-bind /usr/share /usr/share \
      --ro-bind /etc /etc \
-     --ro-bind ~/Documents/pdf ~/pdf \
+     --ro-bind ~/Documents/pdf ~ \
      --proc /proc \
      --dev /dev \
      --ro-bind /run/user/"$(id -u)"/wayland-1 /run/user/"$(id -u)"/wayland-1 \
