@@ -1,25 +1,25 @@
-#!/bin/sh
-
+#!/usr/bin/env bash
 exec bwrap \
-    --proc /proc \
-    --dev /dev \
-    --ro-bind /lib/x86_64-linux-gnu /lib/x86_64-linux-gnu \
-    --ro-bind /usr /usr \
-    --ro-bind /etc /etc \
-    --ro-bind /run /run \
-    --ro-bind /var /var \
-    --ro-bind ~/.Xauthority ~/.Xauthority \
-    --bind ~/.cache/mozilla ~/.cache/mozilla \
-    --bind ~/.mozilla ~/.mozilla \
-    --bind ~/Téléchargements ~/Téléchargements \
-    --dev-bind /dev/snd /dev/snd \
-    --symlink /lib/x86_64-linux-gnu /lib64 \
-    --unshare-all \
-    --share-net \
-    --hostname RESTRICTED \
-    --new-session \
- /usr/lib/firefox/firefox "$@"
-
-
-# /run -> partie réseau
-# /var -> partie fichier temporaire
+  --ro-bind /bin /bin \
+  --ro-bind /opt/firefox /opt/firefox \
+  --ro-bind /usr/share /usr/share/ \
+  --ro-bind /usr/lib /usr/lib \
+  --ro-bind /usr/lib64 /usr/lib64 \
+  --ro-bind /lib64 /lib64 \
+  --ro-bind /etc /etc \
+  --ro-bind /usr/bin /usr/bin \
+  --proc /proc \
+  --dev /dev \
+  --tmpfs /run \
+  --ro-bind /run/user/"$(id -u)"/wayland-1 /run/user/"$(id -u)"/wayland-1 \
+  --ro-bind /run/user/"$(id -u)"/pulse /run/user/"$(id -u)"/pulse \
+  --bind ~/Downloads/firefox ~/Downloads \
+  --bind ~/.mozilla ~/.mozilla \
+  --bind ~/.cache/mozilla ~/.cache/mozilla \
+  --unsetenv DBUS_SESSION_BUS_ADDRESS \
+  --setenv MOZ_ENABLE_WAYLAND 1 \
+  --unshare-all \
+  --share-net \
+  --hostname firefox \
+  --new-session \
+/opt/firefox/firefox-bin
