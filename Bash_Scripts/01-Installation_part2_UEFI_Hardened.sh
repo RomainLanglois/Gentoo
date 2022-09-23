@@ -72,6 +72,16 @@ else
 	/bin/echo "########################################"
 fi
 
+# A tester !
+/bin/echo "########################################" 
+/bin/echo "[*] DHCP configuration:"
+/usr/bin/euse -E networkmanager
+/usr/bin/emerge --ask net-misc/networkmanager && \
+/sbin/rc-service NetworkManager start && \
+/sbin/rc-update add NetworkManager default && \
+/bin/echo "########################################"
+# A tester !
+' :
 /bin/echo "########################################" 
 /bin/echo "[*] DHCP configuration:"
 /usr/bin/emerge --noreplace --quiet net-misc/netifrc && \
@@ -84,6 +94,7 @@ for network_interface in $(/bin/ip a | /bin/grep -i up | /bin/grep -v lo | /usr/
 	/bin/echo -e "${GREEN}[*] Configuration for $network_interface done ! ${NC}"
 done
 /bin/echo "########################################"
+'
 
 /bin/echo "########################################"
 /bin/echo "[*] Configuring /etc/fstab file"
@@ -168,11 +179,13 @@ read username
 /bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 /bin/echo "########################################"
 
+# A tester
 /bin/echo "########################################"
 /bin/echo "[*] Removing annoying beep sound"
 /bin/sed -i "s#\# set bell-style none#set bell-style none#g" /etc/inputrc && \
 /bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 /bin/echo "########################################"
+# A tester
 
 /bin/echo "########################################"
 /bin/echo "[*] Configuring clock"
