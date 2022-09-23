@@ -15,6 +15,4 @@
 	- Reinstall a system == RECOMPILE everything !!
 	
 # TODO
-- Install and configure secure boot
-- Customize and upload the kernel config file
-		- Create a script which handles this process
+- Automate kernel update
