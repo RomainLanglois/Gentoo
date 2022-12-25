@@ -4,6 +4,23 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No colors
 
+install_grub ()
+{
+	/bin/echo "########################################"
+	/bin/echo "[*] Installing and configuring Grub"
+	/bin/rm -rf /etc/portage/package.use/ && \
+	/bin/echo "sys-boot/grub:2 device-mapper" >> /etc/portage/package.use && \
+	/usr/bin/emerge -q sys-boot/grub:2 && \
+	luks_container=$(/sbin/blkid | /bin/grep -i luks | /usr/bin/cut -d " " -f 2) && \
+	/bin/sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=$luks_container keymap=fr\"/g" /etc/default/grub && \
+	/usr/sbin/grub-install --target=x86_64-efi --efi-directory=/boot && \
+	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg && \
+	/sbin/rc-update add lvm boot && \
+	/sbin/rc-update add dmcrypt boot && \
+	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
+	/bin/echo "########################################"
+}
+
 /bin/echo "########################################"
 /bin/echo "[*] Preparing the environment and emerging @world"
 source /etc/profile && \
@@ -72,7 +89,6 @@ else
 	/bin/echo "########################################"
 fi
 
-# A tester !
 /bin/echo "########################################" 
 /bin/echo "[*] DHCP configuration:"
 /usr/bin/euse -E networkmanager
@@ -80,21 +96,6 @@ fi
 /sbin/rc-service NetworkManager start && \
 /sbin/rc-update add NetworkManager default && \
 /bin/echo "########################################"
-# A tester !
-' :
-/bin/echo "########################################" 
-/bin/echo "[*] DHCP configuration:"
-/usr/bin/emerge --noreplace --quiet net-misc/netifrc && \
-/usr/bin/emerge -q net-misc/dhcpcd && \
-for network_interface in $(/bin/ip a | /bin/grep -i up | /bin/grep -v lo | /usr/bin/cut -d ":" -f2 | sed 's/ //g'); do
-	/bin/echo "config_$network_interface=dhcp" >> /etc/conf.d/net && \
-	cd /etc/init.d && \
-	/bin/ln -s net.lo "net.$network_interface" && \
-	/sbin/rc-update add "net.$network_interface" default && \
-	/bin/echo -e "${GREEN}[*] Configuration for $network_interface done ! ${NC}"
-done
-/bin/echo "########################################"
-'
 
 /bin/echo "########################################"
 /bin/echo "[*] Configuring /etc/fstab file"
@@ -133,35 +134,11 @@ then
 		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 		/bin/echo "########################################"
 	else
-		/bin/echo "[*] Your kernel is not compatible with a EFI stub and a harcoded initramfs, going for Grub !"
-		/bin/echo "########################################"
-		/bin/echo "[*] Installing and configuring Grub"
-		/bin/rm -rf /etc/portage/package.use/ && \
-		/bin/echo "sys-boot/grub:2 device-mapper" >> /etc/portage/package.use && \
-		/usr/bin/emerge -q sys-boot/grub:2 && \
-		luks_container=$(/sbin/blkid | /bin/grep -i luks | /usr/bin/cut -d " " -f 2) && \
-		/bin/sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=$luks_container keymap=fr\"/g" /etc/default/grub && \
-		/usr/sbin/grub-install --target=x86_64-efi --efi-directory=/boot && \
-		/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg && \
-		/sbin/rc-update add lvm boot && \
-		/sbin/rc-update add dmcrypt boot && \
-		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
-		/bin/echo "########################################"
+		/bin/echo "[*] Your kernel is not compatible with a EFI stub and a hardcoded initramfs, going to install Grub !"
+		install_grub
 	fi
 else
-	/bin/echo "########################################"
-	/bin/echo "[*] Installing and configuring Grub"
-	/bin/rm -rf /etc/portage/package.use/ && \
-	/bin/echo "sys-boot/grub:2 device-mapper" >> /etc/portage/package.use && \
-	/usr/bin/emerge -q sys-boot/grub:2 && \
-	luks_container=$(/sbin/blkid | /bin/grep -i luks | /usr/bin/cut -d " " -f 2) && \
-	/bin/sed -i "s/\#GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"dolvm crypt_root=$luks_container keymap=fr\"/g" /etc/default/grub && \
-	/usr/sbin/grub-install --target=x86_64-efi --efi-directory=/boot && \
-	/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg && \
-	/sbin/rc-update add lvm boot && \
-	/sbin/rc-update add dmcrypt boot && \
-	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
-	/bin/echo "########################################"
+	install_grub
 fi
 
 /bin/echo "########################################"
@@ -179,13 +156,11 @@ read username
 /bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 /bin/echo "########################################"
 
-# A tester
 /bin/echo "########################################"
 /bin/echo "[*] Removing annoying beep sound"
 /bin/sed -i "s#\# set bell-style none#set bell-style none#g" /etc/inputrc && \
 /bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 /bin/echo "########################################"
-# A tester
 
 /bin/echo "########################################"
 /bin/echo "[*] Configuring clock"
