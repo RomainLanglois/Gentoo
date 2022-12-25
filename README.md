@@ -15,4 +15,5 @@
 	- Reinstall a system == RECOMPILE everything !!
 	
 # TODO
-- Automate kernel update
+- Remove old files after kernel upgrade
+- Finish and improve Wayland installation/configuration script
