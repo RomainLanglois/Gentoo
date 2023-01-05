@@ -1,21 +1,13 @@
 #!/bin/bash
 
-# TODO : Add support to remove old kernel files
-: '
-/bin/echo "########################################"
-/bin/echo "[*] Step 7: Removing old kernel files and configuration"
-- Cleaning needed after compiling a new kernel inside the /boot folder
-- rm -r /usr/src/linux-3.X.Y
-- rm -r /lib/modules/3.X.Y
-- /usr/sbin/efibootmgr --delete-bootnum XX
-- rm /boot/BzImage ??
-/bin/echo -e "${GREEN}[*] Step 7 done ! ${NC}" && \
-/bin/echo "########################################"
-'
+# Still TODO in Phase 7 !
+	# 1) /usr/sbin/efibootmgr -b 0004 -B
+	# 2) rm /boot/efi/gentoo/old_kernel
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No colors
+current_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6)
 
 if [[ "$EUID" -ne 0 ]];
   then 
@@ -55,45 +47,62 @@ cd /usr/src/linux && \
 
 /bin/echo "########################################"
 /bin/echo "[*] Step 4: Adjusting the .config file for the new kernel"
-old_kernel_folder=$(/usr/bin/eselect kernel list | /bin/grep -v "*" | /bin/grep "linux-" | /bin/cut -d " " -f6) && \
-/bin/cp /usr/src/$old_kernel_folder/.config /usr/src/linux/ && \
+/bin/cp /usr/src/$current_kernel_version/.config /usr/src/linux/ && \
 /bin/echo "[?] Whar do you want to do ? (e.g: 1)"
 /bin/echo "		[1] make oldconfig 		<-- The user is asked for a decision"
 /bin/echo "		[2] make olddefconfig 	<-- Keep all of the options from the old .config and set the new options to their recommended default values"
 /bin/echo "		[3] make menuconfig 	<-- Remake a new config file from scratch"
 read user_choice
-if [[ user_choice == 1 ]]
+if [[ "$user_choice" == "1" ]]
 then
 	/usr/bin/make oldconfig
-elif [[ user_choice == 2 ]]
+elif [[ "$user_choice" == "2" ]]
 then
 	/usr/bin/make olddefconfig
 else
-	/usr/bin/make mrproper && \
-	/usr/bin/make menuconfig
+	/usr/bin/make mrproper && /usr/bin/make menuconfig
 fi
 /bin/echo -e "${GREEN}[*] Step 4 done ! ${NC}" && \
 /bin/echo "########################################"
 
 /bin/echo "########################################"
 /bin/echo "[*] Step 5: Building the new kernel"
-if [[ ! $(lsblk | /bin/grep -i boot) ]]
+if [[ ! $(/bin/lsblk | /bin/grep -i boot) ]]
 then
 	/bin/echo "[*] The boot partiton is not mounted !, mounting it..." && \
 	/bin/mount $(/sbin/blkid | /bin/grep -i boot | /bin/cut -d ":" -f1) /boot && \
 	/bin/echo -e "${GREEN}[*] Done !${NC}"
 fi
+/bin/cp /usr/src/$current_kernel_version/usr/initramfs_data.cpio /usr/src/linux/usr/ && \
 /usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
 /usr/bin/genkernel --luks --lvm --kernel-config=/usr/src/linux/.config --no-compress-initramfs initramfs && \
 /bin/mv /boot/initramfs-*.img /usr/src/linux/usr/initramfs_data.cpio && \
-/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
+/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install
 /bin/echo -e "${GREEN}[*] Step 5 done ! ${NC}" && \
 /bin/echo "########################################"
 
 /bin/echo "########################################"
 /bin/echo "[*] Step 6: Updating the bootloader"
-new_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6)
+new_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6) && \
 /bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/bzImage-$new_kernel_version.efi && \
 /usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$new_kernel_version" --loader "\efi\gentoo\bzImage-$new_kernel_version.efi" && \
 /bin/echo -e "${GREEN}[*] Step 6 done ! ${NC}" && \
+/bin/echo "########################################"
+
+/bin/echo "########################################"
+/bin/echo "[*] Step 7: Removing old kernel files and configuration"
+/bin/rm /boot/config-$(uname -r) /boot/System.map-$(uname -r) /boot/vmlinuz-$(uname -r) && \
+/bin/echo "[?] do you need to remove an old kernel ? (Y/N)"
+read user_choice
+if [[ $user_choice == "Y" ]]
+then
+	/bin/echo "[?] Which kernel do you want to remove ? [e.g. 1]" && \
+	/usr/bin/eselect kernel list && \
+	read user_choice && \
+	/bin/rm -r /usr/src/$(eselect kernel list | grep "\[$user_choice\]" | /bin/cut -d " " -f6) && \
+	/bin/rm -r /lib/modules/$(eselect kernel list | grep "\[$user_choice\]" | /bin/cut -d " " -f6 | cut -d "-" -f2)-gentoo-x86_64
+else
+	/bin/echo "${GREEN}[*] No old kernel files removed !${NC}"
+fi
+/bin/echo -e "${GREEN}[*] Step 7 done ! ${NC}" && \
 /bin/echo "########################################"
