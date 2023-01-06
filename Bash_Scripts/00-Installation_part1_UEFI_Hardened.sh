@@ -12,6 +12,7 @@ scripts_array=(
 	"04-Install_and_configure_secureBoot.sh"
 	"05-Install_GUI_XORG.sh"
 	"05-Install_GUI_Wayland-WIP.sh"
+	"06-Update_Kernel.sh"
 )
 make_file=/mnt/gentoo/etc/portage/make.conf
 
