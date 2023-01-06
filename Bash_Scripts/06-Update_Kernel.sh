@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Still TODO in Phase 7 !
-	# 1) /usr/sbin/efibootmgr -b 0004 -B
-	# 2) rm /boot/efi/gentoo/old_kernel
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No colors
@@ -77,7 +73,7 @@ fi
 /usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
 /usr/bin/genkernel --luks --lvm --kernel-config=/usr/src/linux/.config --no-compress-initramfs initramfs && \
 /bin/mv /boot/initramfs-*.img /usr/src/linux/usr/initramfs_data.cpio && \
-/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install
+/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
 /bin/echo -e "${GREEN}[*] Step 5 done ! ${NC}" && \
 /bin/echo "########################################"
 
@@ -92,15 +88,28 @@ new_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "l
 /bin/echo "########################################"
 /bin/echo "[*] Step 7: Removing old kernel files and configuration"
 /bin/rm /boot/config-$(uname -r) /boot/System.map-$(uname -r) /boot/vmlinuz-$(uname -r) && \
+/bin/mv /boot/efi/gentoo/bzImage-$current_kernel_version.efi /boot/efi/gentoo/rescue/ && \
 /bin/echo "[?] do you need to remove an old kernel ? (Y/N)"
 read user_choice
 if [[ $user_choice == "Y" ]]
 then
 	/bin/echo "[?] Which kernel do you want to remove ? [e.g. 1]" && \
 	/usr/bin/eselect kernel list && \
-	read user_choice && \
-	/bin/rm -r /usr/src/$(eselect kernel list | grep "\[$user_choice\]" | /bin/cut -d " " -f6) && \
-	/bin/rm -r /lib/modules/$(eselect kernel list | grep "\[$user_choice\]" | /bin/cut -d " " -f6 | cut -d "-" -f2)-gentoo-x86_64
+	read kernel_version && \
+	/bin/rm /boot/efi/gentoo/rescue/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
+	/bin/rm -r /usr/src/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
+	/bin/rm -r /lib/modules/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6 | /bin/cut -d "-" -f2)-gentoo-x86_64 && \
+	/usr/sbin/efibootmgr && \
+	/bin/echo "[?] Which efibootmgr entry do you want to remove ? [e.g. 1]"
+	read efibootmgr_entry
+	# Check if value provide by the user is a number
+	if [[ $efibootmgr_entry =~ ^[0-9]+$ ]]
+	then
+		/usr/sbin/efibootmgr -b $efibootmgr_entry -B
+	else
+		/bin/echo "[*] The value enter is probably not a number !" && \
+		/bin/echo "[*] No efibootmgr entry removed !"
+	fi
 else
 	/bin/echo "${GREEN}[*] No old kernel files removed !${NC}"
 fi
