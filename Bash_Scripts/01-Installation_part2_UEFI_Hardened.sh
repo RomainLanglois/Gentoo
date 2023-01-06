@@ -80,10 +80,13 @@ then
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 	/bin/echo "########################################"
 else
-	/bin/echo "[*] Downloading custom kernel from github"
+	/bin/echo "[*] Downloading and compiling custom kernel from github"
 	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/kernel/initramfs -O /usr/src/linux/usr/initramfs_data.cpio && \
 	/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/kernel/config -O /usr/src/linux/.config && \
 	cd /usr/src/linux && \
+	/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
+	/usr/bin/genkernel --luks --lvm --kernel-config=/usr/src/linux/.config --no-compress-initramfs initramfs && \
+	/bin/mv /boot/initramfs-*.img /usr/src/linux/usr/initramfs_data.cpio && \
 	/usr/bin/make -j$(nproc) && /usr/bin/make modules_install && /usr/bin/make install && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 	/bin/echo "########################################"
@@ -120,6 +123,7 @@ then
 	   [[ $(grep -i "CONFIG_CMDLINE_BOOL=y" /usr/src/linux/.config) ]] && \
 	   [[ $(grep -i 'CONFIG_CMDLINE="root=/dev/mapper/vg0-root ro dolvm crypt_root=/dev/sda2 keymap=fr"' /usr/src/linux/.config) ]]
 	then
+		current_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6)
 		/bin/echo "########################################"
 		/bin/echo "[*] Installing and configuring EFI stub"
 		/usr/bin/emerge -q sys-boot/efibootmgr && \
@@ -129,8 +133,8 @@ then
 		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/rescue/bzImage-$(uname -r).efi && \
 		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 		/bin/echo "[*] Creating EFI stub entries" && \
-		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo" --loader "\efi\gentoo\bzImage-$(uname -r).efi" && \
-		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "Gentoo_rescue" --loader "\efi\gentoo\rescue\bzImage-$(uname -r).efi" && \
+		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$current_kernel_version" --loader "\efi\gentoo\bzImage-$current_kernel_version.efi" && \
+		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$current_kernel_version-RESCUE" --loader "\efi\gentoo\rescue\bzImage-$current_kernel_version.efi" && \
 		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 		/bin/echo "########################################"
 	else
