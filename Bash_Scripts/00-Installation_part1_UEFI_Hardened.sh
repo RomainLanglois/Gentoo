@@ -6,6 +6,7 @@ NC='\033[0m' # No colors
 
 script_github_path=https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Bash_Scripts/
 scripts_array=(
+	"00-Installation_part1_UEFI_Hardened.sh"
 	"01-Installation_part2_UEFI_Hardened.sh"
 	"02-Install_CLI_softwares.sh"
 	"03-Install_Configure_Bwrap-Firewall-USB.sh"
@@ -123,6 +124,7 @@ for script in ${scripts_array[@]}; do
 	  /bin/chmod +x /mnt/gentoo/scripts/$script && \
 	  /bin/echo -e "${GREEN}[*] Script: $script correctly downloaded and configured ! ${NC}"	
 done
+/bin/chmod -R 700 /mnt/gentoo/scripts && \
 cd /mnt/gentoo/scripts && \
 # chroot /mnt/gentoo /bin/bash 
 /usr/bin/chroot /mnt/gentoo/ ./scripts/Installation_part2_UEFI_Hardened.sh
