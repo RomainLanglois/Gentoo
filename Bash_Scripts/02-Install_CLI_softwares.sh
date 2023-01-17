@@ -3,7 +3,6 @@
 softwares_array=(
 "app-eselect/eselect-repository"
 "app-misc/neofetch"
-"app-portage/gentoolkit"
 "dev-vcs/git"
 "sys-apps/usbutils"
 "sys-process/htop"
@@ -15,6 +14,8 @@ softwares_array=(
 "dev-util/strace" 
 "app-arch/p7zip"
 "sys-process/lsof"
+"sys-apps/pciutils"
+"sys-apps/hwdata"
 )
 
 if [[ "$EUID" -ne 0 ]];
