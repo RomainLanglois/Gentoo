@@ -60,10 +60,7 @@ env-update && source /etc/profile && export PS1="(chroot) ${PS1}" && \
 /bin/echo "########################################"
 /bin/echo "[*] Installing / Configuring linux firmware, kernel sources and initramfs"
 /bin/echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license && \
-/usr/bin/emerge -q sys-kernel/linux-firmware && \
-/usr/bin/emerge -q sys-kernel/gentoo-sources && \
-/usr/bin/emerge -q sys-fs/cryptsetup sys-fs/lvm2 && \
-/usr/bin/emerge -q app-arch/lz4 && \
+/usr/bin/emerge -q sys-kernel/linux-firmware sys-kernel/gentoo-sources sys-fs/cryptsetup sys-fs/lvm2 sys-kernel/genkernel && \
 /usr/bin/eselect kernel list
 /bin/echo "[?] Please select the kernel:"
 read kernel
@@ -74,7 +71,7 @@ read user_choice
 if [[ $user_choice = "Y" ]]
 then
 	/bin/echo "[*] Going for a generic kernel"
-	/usr/bin/emerge -q sys-kernel/genkernel && \
+	/usr/bin/emerge -q app-arch/lz4 && \
 	/usr/bin/genkernel --luks --lvm --no-zfs all && \
 	/usr/bin/genkernel --luks --lvm --compress-initramfs-type=lz4 initramfs && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
@@ -94,8 +91,12 @@ fi
 
 /bin/echo "########################################" 
 /bin/echo "[*] DHCP configuration:"
-/usr/bin/euse -E networkmanager
-/usr/bin/emerge --ask net-misc/networkmanager && \
+/usr/bin/emerge -q app-portage/gentoolkit && \
+/usr/bin/euse -E networkmanager && \
+/bin/rm -f /etc/portage/package.use && \
+/bin/echo "net-dialup/ppp ipv6" >> /etc/portage/package.use && \
+/bin/echo "net-wireless/wpa_supplicant dbus" >> /etc/portage/package.use && \
+/usr/bin/emerge -q net-misc/networkmanager && \
 /sbin/rc-service NetworkManager start && \
 /sbin/rc-update add NetworkManager default && \
 /bin/echo "########################################"
@@ -128,13 +129,13 @@ then
 		/bin/echo "[*] Installing and configuring EFI stub"
 		/usr/bin/emerge -q sys-boot/efibootmgr && \
 		/bin/mkdir -p /boot/efi/gentoo /boot/efi/gentoo/rescue && \
-		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/bzImage-$(uname -r).efi && \
+		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/bzImage-$current_kernel_version.efi && \
 		/bin/echo "[*] Generating a EFI stub rescue" && \
-		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/rescue/bzImage-$(uname -r).efi && \
+		/bin/cp /usr/src/linux/arch/x86/boot/bzImage /boot/efi/gentoo/rescue/bzImage-$current_kernel_version.efi && \
 		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 		/bin/echo "[*] Creating EFI stub entries" && \
-		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$current_kernel_version" --loader "\efi\gentoo\bzImage-$current_kernel_version.efi" && \
 		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$current_kernel_version-RESCUE" --loader "\efi\gentoo\rescue\bzImage-$current_kernel_version.efi" && \
+		/usr/sbin/efibootmgr --create --disk /dev/sda --part 1 --label "$current_kernel_version" --loader "\efi\gentoo\bzImage-$current_kernel_version.efi" && \
 		/bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 		/bin/echo "########################################"
 	else
@@ -167,11 +168,7 @@ read username
 /bin/echo "########################################"
 
 /bin/echo "########################################"
-/bin/echo "[*] Configuring clock"
-/bin/date
-/bin/echo "[?] Please enter the current time (Example : 20:59:00):"
-read time
-/bin/date -s "$time" && \
+/bin/echo "[*] Configuring hardware clock"
 /sbin/hwclock --systohc && \
 /bin/echo -e "${GREEN}[*] Done ! ${NC}" && \
 /bin/echo "########################################"
