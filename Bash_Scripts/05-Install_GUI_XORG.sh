@@ -52,7 +52,8 @@ source /etc/profile && \
 /bin/echo "media-plugins/alsa-plugins pulseaudio" >> /etc/portage/package.use && \
 /bin/echo "app-text/poppler cairo" >> /etc/portage/package.use && \
 /bin/echo "app-crypt/gcr gtk" >> /etc/portage/package.use && \
-/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-misc/arandr x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince gnome-extra/nm-applet && \
+/bin/echo "app-admin/keepassxc yubikey" && \
+/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-misc/arandr x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince gnome-extra/nm-applet app-admin/keepassxc && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 

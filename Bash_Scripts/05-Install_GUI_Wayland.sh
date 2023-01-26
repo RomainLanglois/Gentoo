@@ -54,7 +54,8 @@ fi
 /bin/echo "[*] Installing other GUI components"
 /bin/echo "app-text/poppler cairo " >> $package_use_file && \
 /bin/echo "app-crypt/gcr gtk" >> $package_use_file && \
-/usr/bin/emerge -q x11-misc/arandr gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet && \
+/bin/echo "app-admin/keepassxc yubikey" && \
+/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
