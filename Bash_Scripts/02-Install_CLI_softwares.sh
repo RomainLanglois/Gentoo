@@ -11,11 +11,12 @@ softwares_array=(
 "app-shells/zsh"
 "sys-fs/ntfs3g"
 "dev-util/ltrace"
-"dev-util/strace" 
+"dev-util/strace"
 "app-arch/p7zip"
 "sys-process/lsof"
 "sys-apps/pciutils"
 "sys-apps/hwdata"
+"dev-python/pip"
 )
 
 if [[ "$EUID" -ne 0 ]];
