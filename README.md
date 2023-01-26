@@ -13,7 +13,4 @@
 - Use specific flag for your compiler to optimize the compilation process for your architecture
 - Be prepare to debug and RESCUE a broken system !
 	- Reinstall a system == RECOMPILE everything !!
-	
-# TODO
-- Remove old files after kernel upgrade
-- Finish and improve Wayland installation/configuration script
+
