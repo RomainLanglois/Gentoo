@@ -46,10 +46,18 @@ install_and_configure_firewall ()
 
 install_and_configure_usb-guard ()
 {
-	/bin/echo "[*] Installing and configuring usbguard in version 1.1.1-r3 !"
+	/bin/echo "[*] Installing and configuring usbguard !"
 	/bin/echo 'sys-apps/usbguard ~amd64' > /etc/portage/package.accept_keywords/usbguard && \
-	/usr/bin/emerge -q sys-apps/usbguard && \
-	/usr/bin/usbguard generate-policy > /etc/usbguard/rules.conf && \
+	/usr/bin/emerge -q sys-apps/usbguard
+	/bin/echo "[?] Do you want to download a custom rule set ? (Y/N)"
+	read user_input
+	if [[ $user_input == "Y" ]]
+	then
+		/usr/bin/wget https://raw.githubusercontent.com/RomainLanglois/Gentoo/main/Configuration_files/usbguard_rules-T560.conf -O /etc/usbguard/rules.conf
+	else
+		/bin/echo "[*] Generating a custom one !"
+		/usr/bin/usbguard generate-policy > /etc/usbguard/rules.conf
+	fi
 	/sbin/rc-update add usbguard default && \
 	/sbin/rc-service usbguard start && \
 	/bin/echo -e "${GREEN}[*] Done ! ${NC}"
