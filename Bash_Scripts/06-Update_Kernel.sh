@@ -1,12 +1,17 @@
 #!/bin/bash
 
+# TODO
+# Automate the deletion of the old efibootmgr entry
+
+set -e
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No colors
 current_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6)
 
 if [[ "$EUID" -ne 0 ]];
-  then 
+  then
   /bin/echo "[*] Please run this script as root"
   exit 1
 fi
@@ -44,7 +49,7 @@ cd /usr/src/linux && \
 /bin/echo "########################################"
 /bin/echo "[*] Step 4: Adjusting the .config file for the new kernel"
 /bin/cp /usr/src/$current_kernel_version/.config /usr/src/linux/ && \
-/bin/echo "[?] Whar do you want to do ? (e.g: 1)"
+/bin/echo "[?] What do you want to do ? (e.g: 1)"
 /bin/echo "		[1] make oldconfig 		<-- The user is asked for a decision"
 /bin/echo "		[2] make olddefconfig 	<-- Keep all of the options from the old .config and set the new options to their recommended default values"
 /bin/echo "		[3] make menuconfig 	<-- Remake a new config file from scratch"
@@ -87,8 +92,8 @@ new_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "l
 
 /bin/echo "########################################"
 /bin/echo "[*] Step 7: Removing old kernel files and configuration"
-/bin/rm /boot/config-$(uname -r) /boot/System.map-$(uname -r) /boot/vmlinuz-$(uname -r) && \
-/bin/mv /boot/efi/gentoo/bzImage-$current_kernel_version.efi /boot/efi/gentoo/rescue/ && \
+/bin/rm /boot/config-* /boot/System.map-* /boot/vmlinuz-* && \
+/bin/mv /boot/efi/gentoo/bzImage-$current_kernel_version.efi /boot/efi/gentoo/rescue/
 /bin/echo "[?] do you need to remove an old kernel ? (Y/N)"
 read user_choice
 if [[ $user_choice == "Y" ]]
@@ -99,7 +104,7 @@ then
 	/bin/rm /boot/efi/gentoo/rescue/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
 	/bin/rm -r /usr/src/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
 	/bin/rm -r /lib/modules/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6 | /bin/cut -d "-" -f2)-gentoo-x86_64 && \
-	/usr/sbin/efibootmgr && \
+	/usr/sbin/efibootmgr
 	/bin/echo "[?] Which efibootmgr entry do you want to remove ? [e.g. 1]"
 	read efibootmgr_entry
 	# Check if value provide by the user is a number
