@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 make_file=/etc/portage/make.conf
 package_use_file=/etc/portage/package.use
 
@@ -43,7 +45,7 @@ fi
 /bin/echo "###########################################"
 
 /bin/echo "###########################################"
-/bin/echo "[*] Installing Sway adn seatd"
+/bin/echo "[*] Installing Sway"
 /usr/bin/emerge -q gui-wm/sway gui-apps/foot sys-auth/elogind && \
 /sbin/rc-update add elogind boot && \
 /sbin/rc-service elogind start && \
@@ -55,7 +57,8 @@ fi
 /bin/echo "app-text/poppler cairo " >> $package_use_file && \
 /bin/echo "app-crypt/gcr gtk" >> $package_use_file && \
 /bin/echo "app-admin/keepassxc yubikey" && \
-/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc && \
+/bin/echo "app-crypt/veracrypt truecrypt-3.0" >> /etc/portage/package.license && \
+/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 

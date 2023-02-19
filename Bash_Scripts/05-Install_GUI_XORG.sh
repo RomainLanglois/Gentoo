@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 make_file=/etc/portage/make.conf
 
 if [[ "$EUID" -ne 0 ]];
@@ -53,7 +55,8 @@ source /etc/profile && \
 /bin/echo "app-text/poppler cairo" >> /etc/portage/package.use && \
 /bin/echo "app-crypt/gcr gtk" >> /etc/portage/package.use && \
 /bin/echo "app-admin/keepassxc yubikey" && \
-/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-misc/arandr x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince gnome-extra/nm-applet app-admin/keepassxc && \
+/bin/echo "app-crypt/veracrypt truecrypt-3.0" >> /etc/portage/package.license && \
+/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-misc/arandr x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
