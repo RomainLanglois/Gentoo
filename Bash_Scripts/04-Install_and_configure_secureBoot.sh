@@ -1,19 +1,36 @@
 #!/bin/bash
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No colors
-efikeys_folder=/etc/efikeys
+set -e
+
+RED='\e[31m'
+GREEN='\e[32m'
+YELLOW='\e[33m'
+NC='\e[0m' # No colors
+efikeys_folder=/etc/efikeys/
 check_if_system_has_rebooted=/root/.reboot_needed
 
 usage ()
 {
-	/bin/echo "Usage : $0 <action>"
-	/bin/echo "	List of actions:"
-	/bin/echo "		check_install :	Check if needed softwares are installed, if not install them"
-	/bin/echo "		generate_keys :	Generate keys (private, public and the certificates)"
-	/bin/echo "		sign_file :	Sign the file passed as a parameter using the designated keys"
-	/bin/echo "		export_keys :	export newly generated keys to a safe location"
+	/bin/echo -e "${YELLOW}Usage : $0 <action>"
+	/bin/echo -e "	List of actions:"
+	/bin/echo -e "		check_install :	Check if needed softwares are installed, if not install them"
+	/bin/echo -e "		generate_keys :	Generate keys (private, public and the certificates)"
+	/bin/echo -e "		sign_file :	Sign the file passed as a parameter using the designated keys"
+	/bin/echo -e "		export_keys :	export newly generated keys to a safe location${NC}"
+}
+
+
+warning ()
+{
+	/bin/echo -e "${RED}[!] Secure Boot configuration script !"
+	/bin/echo -e "[!] Caution this script makes the assumption you are running a EFI stub kernel !"
+	/bin/echo -e "[!] If you are using a bootloader like GRUB, this script won't work !${NC}"
+	read -p "[?] Are you sure you want to continue (Y/N) ? :" user_choice
+	if [[ ! $user_choice == "Y" ]];
+	then
+		/bin/echo -e "${RED}[*] Exiting... ${NC}"
+		exit 1
+	fi
 }
 
 check_install ()
@@ -26,7 +43,7 @@ check_install ()
 
 	# Check if program is installed, if not install it
 	for program in ${program_array[@]}; do
-		if [[ $(emerge -p $program | grep -i "ebuild  N") ]]
+		if [[ $(emerge -p $program | grep -i "ebuild  N") ]];
 		then
 			/bin/echo "[*] $program is not installed, going for installation..." && \
 			emerge -q $program && \
@@ -40,12 +57,11 @@ check_install ()
 generate_keys ()
 {
 	/bin/echo "[*] Generate keys process..."
-	# check if repository /etc/efikeys exists
-	if [[ ! -f $check_if_system_has_rebooted ]]
+	if [[ ! -f $check_if_system_has_rebooted ]];
 	then
 		/bin/echo "[*] Entering phase 1 !"
 		/bin/echo "[*] Create directory and backup old PK, KEK, db and dbx variables"
-		if [[ ! -d $efikeys_folder ]]
+		if [[ ! -d $efikeys_folder ]];
 		then
 			/bin/mkdir $efikeys_folder
 		fi
@@ -58,8 +74,7 @@ generate_keys ()
 		/bin/echo -e "${GREEN}[*] Done !${NC}"
 
 		/bin/echo "[*] Generate keys (private and public), their respective certificate and configure the correct rights on them"
-		/bin/echo -n "Enter a Common Name to embed in the keys: "
-		read name
+		read -p "Enter a Common Name to embed in the keys: " name
 		/usr/bin/openssl req -new -x509 -newkey rsa:2048 -subj "/CN=$name PK/" -keyout PK.key -out PK.crt -days 3650 -nodes -sha256 && \
 		/usr/bin/openssl req -new -x509 -newkey rsa:2048 -subj "/CN=$name KEK/" -keyout KEK.key -out KEK.crt -days 3650 -nodes -sha256 && \
 		/usr/bin/openssl req -new -x509 -newkey rsa:2048 -subj "/CN=$name db/" -keyout db.key -out db.crt -days 3650 -nodes -sha256 && \
@@ -101,9 +116,8 @@ generate_keys ()
 		/bin/echo "	2. Turn SecureBoot in Setup Mode"
 		/bin/echo "	3. Turn SecureBoot OFF"
 		/bin/echo " 	4. Save and exit"
-		/bin/echo "[?] are you ready to restart (Y/N) ?"
-		read user_choice
-		if [[ $user_choice == "Y" ]]
+		read -p "[?] are you ready to restart (Y/N) ? :" user_choice
+		if [[ $user_choice == "Y" ]];
 		then
 			/bin/echo "[*] Your system will restart in 5 seconds" && \
 			/usr/bin/touch $check_if_system_has_rebooted && \
@@ -114,7 +128,7 @@ generate_keys ()
 			/usr/bin/touch $check_if_system_has_rebooted && \
 			exit 0
 		fi
-	elif [[ -f $check_if_system_has_rebooted ]]
+	elif [[ -f $check_if_system_has_rebooted ]];
 	then
 		/bin/echo "[*] Entering phase 2 !"
 		/bin/echo "[*] Update EFI variables for secureboot"
@@ -126,9 +140,8 @@ generate_keys ()
 		/usr/bin/efi-updatevar -e -f compound_KEK.esl KEK && \
 		/usr/bin/efi-updatevar -f PK.auth PK && \
 		/usr/bin/efi-readvar
-		/bin/echo "[?] Please check the content of the different EFI variables, is everyting correct ? (Y/N)"
-		read user_choice
-		if [[ ! $user_choice == "Y" ]]
+		read -e -p "[?] Please check the content of the different EFI variables, is everyting correct ? (Y/N) :" user_choice
+		if [[ ! $user_choice == "Y" ]];
 		then
 			/bin/echo -e "${RED}[*] The content of EFI variables are not right, exiting... ${NC}"
 			exit 1
@@ -141,19 +154,12 @@ generate_keys ()
 		/usr/bin/efi-readvar -v dbx -o new_dbx.esl && \
 		/bin/echo -e "${GREEN}[*] Done !${NC}"
 
-		if [[ ! $(lsblk | /bin/grep -i boot) ]]
-		then
-			/bin/echo "[*] The boot partiton is not mounted !, mounting it..." && \
-			/bin/mount $(/sbin/blkid | /bin/grep -i boot | /usr/bin/cut -d ":" -f1) /boot && \
-			/bin/echo -e "${GREEN}[*] Done !${NC}"
-		fi
 		/bin/echo -e "${RED}[*] Don't forget to export the generated keys inside the folder: $efikeys_folder to a safe location !!! ${NC}"
 		/bin/echo "[*] You will need to reboot your system and modify UEFI parameters related to secure boot"
 		/bin/echo "	1. Turn SecureBoot in User Mode"
 		/bin/echo "	2. Turn SecureBoot ON"
-		/bin/echo "[?] Are you ready to restart (Y/N) ?"
-		read user_choice
-		if [[ $user_choice == "Y" ]]
+		read -p "[?] Are you ready to restart (Y/N) ? :" user_choice
+		if [[ $user_choice == "Y" ]];
 		then
 				/bin/echo "[*] Your system will restart in 5 seconds" && \
 				/bin/rm $check_if_system_has_rebooted && \
@@ -173,32 +179,27 @@ generate_keys ()
 sign_file ()
 {
 	/bin/echo "[*] Signing file process..."
-	/bin/echo "[?] Please give the file location and name (example: /boot/EFI/gentoo/bzImage) ?"
-	read file_to_sign
-	/bin/echo "[?] Please give the folder where are stored the db private and public keys (example: /media/veracrypt3) ?"
-	read keys_path
-	/bin/cp $file_to_sign $file_to_sign-unsigned && \
-	/usr/bin/sbsign --key $keys_path/db.key --cert $keys_path/db.crt $file_to_sign-unsigned --output $file_to_sign && \
-	/bin/rm $file_to_sign-unsigned && \
+	read -e -p "[?] Please give the file location and name (example: /boot/EFI/gentoo/bzImage): " file_to_sign
+	read -e -p "[?] Please give the folder where are stored the db private and public keys (example: /media/veracrypt3): " keys_path
+	/usr/bin/sbsign --key $keys_path/db.key --cert $keys_path/db.crt $file_to_sign --output $file_to_sign
 	/bin/echo -e "${GREEN}[*] Done !${NC}"
 }
 
 export_keys ()
 {
 	/bin/echo "[*] Export keys process..."
-	/bin/echo "[?] Please give the path to an ENCRYPT folder where to store the keys (example: /media/veracrypt3) ?"
-	read encrypted_folder
+	read -e -p "[?] Please give the path to an ENCRYPTED folder where to store the keys (example: /media/veracrypt3): " encrypted_folder
 	/bin/cp -r $efikeys_folder $encrypted_folder && \
-	/bin/echo -e "${GREEN}[*] Done !${NC}" 
-	echo "[?] Are ready to remove the folder: $efikeys_folder (Y/N) ?"
-	read user_choice
+	/bin/echo -e "${GREEN}[*] Done !${NC}"
+	read -p "[?] Are ready to remove the folder: $efikeys_folder (Y/N) ? :" user_choice
 	if [[ $user_choice == "Y" ]]
 	then
-		/bin/echo -e "[*] Removing folder: $efikeys_folder" 
-		/bin/rm -rf $efikeys_folder && \
-		/bin/echo -e "${GREEN}[*] Done !${NC}" 
+		/bin/echo -e "[*] Removing folder: $efikeys_folder, this can take a bit of time !"
+		/usr/bin/shred --random-source=/dev/urandom -z -u $efikeys_folder/* && \
+		/bin/rmdir $efikeys_folder && \
+		/bin/echo -e "${GREEN}[*] Done !${NC}"
 	else
-		echo "[*] You will have to remove this folder later !" && \
+		/bin/echo "[*] You will have to remove this folder later !" && \
 		exit 0
 	fi
 }
@@ -211,30 +212,24 @@ then
 fi
 
 
-echo "[*] Secure Boot configuration script !"
-echo "[*] Caution this script makes the assumption you are running a EFI stub kernel !"
-echo "[*] If you are using a bootloader like GRUB, this script won't work !"
-echo "[?] Are you sure you want to continue (Y/N) ?"
-read user_choice
-if [[ ! $user_choice == "Y" ]]
-then
-	echo -e "${RED}[*] Exiting... ${NC}"
-	exit 1
-fi
-
 user_choice=$1
-if [[ $user_choice == "check_install" ]]
+if [[ $user_choice ]];
 then
-	check_install
-elif [[ $user_choice == "generate_keys" ]]
-then
-	generate_keys
-elif [[ $user_choice == "sign_file" ]]
-then
-	sign_file
-elif [[ $user_choice == "export_keys" ]]
-then
-	export_keys
+	if [[ $user_choice == "check_install" ]];
+	then
+		warning && check_install
+	elif [[ $user_choice == "generate_keys" ]];
+	then
+		warning && generate_keys
+	elif [[ $user_choice == "sign_file" ]];
+	then
+		sign_file
+	elif [[ $user_choice == "export_keys" ]];
+	then
+		export_keys
+	else
+		usage
+	fi
 else
 	usage
 fi
