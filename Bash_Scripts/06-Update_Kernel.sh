@@ -8,6 +8,7 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No colors
+YELLOW='\e[33m'
 current_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "linux-" | /bin/cut -d " " -f6)
 
 if [[ "$EUID" -ne 0 ]];
@@ -98,25 +99,29 @@ new_kernel_version=$(/usr/bin/eselect kernel list | /bin/grep "*" | /bin/grep "l
 read user_choice
 if [[ $user_choice == "Y" ]]
 then
-	/bin/echo "[?] Which kernel do you want to remove ? [e.g. 1]" && \
 	/usr/bin/eselect kernel list && \
-	read kernel_version && \
-	/bin/rm /boot/efi/gentoo/rescue/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
-	/bin/rm -r /usr/src/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6) && \
-	/bin/rm -r /lib/modules/$(/usr/bin/eselect kernel list | /bin/grep "\[$kernel_version\]" | /bin/cut -d " " -f6 | /bin/cut -d "-" -f2)-gentoo-x86_64 && \
-	/usr/sbin/efibootmgr
-	/bin/echo "[?] Which efibootmgr entry do you want to remove ? [e.g. 1]"
-	read efibootmgr_entry
-	# Check if value provide by the user is a number
-	if [[ $efibootmgr_entry =~ ^[0-9]+$ ]]
-	then
-		/usr/sbin/efibootmgr -b $efibootmgr_entry -B
-	else
-		/bin/echo "[*] The value enter is probably not a number !" && \
-		/bin/echo "[*] No efibootmgr entry removed !"
-	fi
+	read -p "[?] Which kernel do you want to remove ? [e.g. linux-6.1.12-gentoo]" kernel_version && \
+    if [[ $kernel_version =~ linux-[0-9]\.[0-9]{1,2}\.[0-9]{1,3}-gentoo ]]
+    then
+	    /bin/rm /boot/efi/gentoo/rescue/bzImage-$kernel_version.efi && \
+	    /bin/rm -r /usr/src/$kernel_version && \
+	    /bin/rm -r /lib/modules/$(/bin/echo $kernel_version | /bin/cut -d " " -f6 | /bin/cut -d "-" -f2)-gentoo-x86_64 && \
+	    /usr/sbin/efibootmgr
+	    /bin/echo "[?] Which efibootmgr entry do you want to remove ? [e.g. 1]"
+	    read efibootmgr_entry
+	    # Check if value provide by the user is a number
+	    if [[ $efibootmgr_entry =~ ^[0-9]+$ ]]
+	    then
+		    /usr/sbin/efibootmgr -b $efibootmgr_entry -B
+	    else
+		    /bin/echo "[*] The value enter is probably not a number !" && \
+		    /bin/echo "[*] No efibootmgr entry removed !"
+	    fi
+     else
+        /bin/echo "[*] The value for kernel version doesn't match the regex"
+     fi
 else
-	/bin/echo "${GREEN}[*] No old kernel files removed !${NC}"
+	 /bin/echo "${YELLOW}[INFO] No old kernel files removed !${NC}"
 fi
 /bin/echo -e "${GREEN}[*] Step 7 done ! ${NC}" && \
 /bin/echo "########################################"
