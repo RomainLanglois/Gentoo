@@ -1,0 +1,100 @@
+#!/bin/bash
+
+set -e
+
+RED='\e[31m'
+GREEN='\e[32m'
+YELLOW='\e[33m'
+NC='\e[0m' # No colors
+kernel_folder=/usr/src/linux
+
+modules_array=(
+    "toto"
+    "test"
+)
+
+kernel_parameters_array=(
+    # Hardware configuration
+    "CONFIG_CPU_SUP_INTEL"
+    "CONFIG_PERF_EVENTS"
+    "CONFIG_PERF_EVENTS_INTEL_UNCORE"
+    "CONFIG_DRM_I915"
+    "CONFIG_PCI"
+    "CONFIG_SND"
+    "CONFIG_SND_HDA_CORE"
+    "CONFIG_SND_HDA_I915"
+    "CONFIG_PCI"
+    "CONFIG_USB"
+    "CONFIG_USB_EHCI_HCD"
+    "CONFIG_USB_FHCI_HCD"
+    "CONFIG_USB_HWA_HCD"
+    "CONFIG_USB_ISP116X_HCD"
+    "CONFIG_USB_ISP1760_HCD"
+    "CONFIG_USB_OHCI_HCD"
+    "CONFIG_USB_R8A66597_HCD"
+    "CONFIG_USB_SL811_HCD"
+    "CONFIG_USB_U132_HCD"
+    "CONFIG_USB_UHCI_HCD"
+    "CONFIG_USB_XHCI_HCD"
+    "CONFIG_THERMAL"
+    "CONFIG_INTEL_PCH_THERMAL"
+    "CONFIG_INTEL_MEI"
+    "CONFIG_INTEL_MEI_ME"
+    "CONFIG_ATA"
+    "CONFIG_SATA_AHCI"
+    "CONFIG_PCI"
+    "CONFIG_PCIEPORTBUS"
+    "CONFIG_SND"
+    "CONFIG_SND_SOC"
+    "CONFIG_SND_SOC_INTEL_SKYLAKE"
+    "CONFIG_I2C_I801"
+    "CONFIG_E1000E"
+    "CONFIG_ETHERNET"
+    "CONFIG_NET_VENDOR_INTEL"
+    "CONFIG_IWLWIFI"
+    "CONFIG_WLAN"
+    "CONFIG_WLAN_VENDOR_INTEL"
+    "CONFIG_THINKPAD_ACPI"
+    "CONFIG_X86"
+    "CONFIG_USB_VIDEO_CLASS"
+    "CONFIG_PCI"
+    # Make TTY work
+    "CONFIG_VGA_CONSOLE"
+    "CONFIG_DUMMY_CONSOLE"
+    "CONFIG_FRAMEBUFFER_CONSOLE"
+    "CONFIG_FRAMEBUFFER_CONSOLE_DETECT_PRIMARY"
+)
+
+kernel_parameters_string_array=(
+    # Make TTY work
+    CONFIG_DUMMY_CONSOLE_COLUMNS '80'
+    CONFIG_DUMMY_CONSOLE_ROWS '25'
+)
+
+if [[ "$EUID" -ne 0 ]];
+then 
+    /bin/echo "[*] Please run this script as root"
+    exit 1
+fi
+
+
+/bin/echo -e "${YELLOW}[*] Configuring kernel parameters !${NC}"
+for kernel_parameter_string in $kernel_parameters_string_array{[@]}; do
+    $kernel_folder/scripts/config --set-val "$kernel_parameter_string"
+done
+/bin/echo -e "${GREEN}[*]DONE !${NC}"
+
+
+
+/bin/echo -e "${YELLOW}[*] Configuring kernel parameters !${NC}"
+for kernel_parameter in $kernel_parameter_array{[@]}; do
+    $kernel_folder/scripts/config --enable $kernel_parameter
+done
+/bin/echo -e "${GREEN}[*]DONE !${NC}"
+
+
+/bin/echo -e "${YELLOW}[*] Configuring kernel modules !${NC}"
+for module in $modules_array{[@]}; do
+    $kernel_folder/scripts/config --module $module
+done
+/bin/echo -e "${GREEN}[*]DONE !${NC}"
