@@ -54,11 +54,15 @@ source /etc/profile && \
 /bin/echo "media-plugins/alsa-plugins pulseaudio" >> /etc/portage/package.use && \
 /bin/echo "app-text/poppler cairo" >> /etc/portage/package.use && \
 /bin/echo "app-crypt/gcr gtk" >> /etc/portage/package.use && \
-/bin/echo "app-admin/keepassxc yubikey" && \
+/bin/echo "app-admin/keepassxc yubikey" >> /etc/portage/package.use && \
+/bin/echo "media-libs/harfbuzz icu" >> /etc/portage/package.use && \
+/bin/echo "dev-libs/xmlsec nss" >> /etc/portage/package.use && \
 /bin/echo "app-crypt/veracrypt truecrypt-3.0" >> /etc/portage/package.license && \
-/usr/bin/emerge -q x11-misc/xautolock x11-misc/dmenu x11-misc/arandr x11-terms/terminator www-client/firefox-bin media-gfx/feh app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt && \
+/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt x11-misc/grsync app-office/libreoffice-bin && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
+
+
 
 /bin/echo "###########################################"
 /bin/echo "[*] Install and configure alsa (Sound)"

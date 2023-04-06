@@ -56,9 +56,11 @@ fi
 /bin/echo "[*] Installing other GUI components"
 /bin/echo "app-text/poppler cairo " >> $package_use_file && \
 /bin/echo "app-crypt/gcr gtk" >> $package_use_file && \
-/bin/echo "app-admin/keepassxc yubikey" && \
+/bin/echo "app-admin/keepassxc yubikey" >> $package_use_file && \
+/bin/echo "media-libs/harfbuzz icu" >> $package_use_file && \
+/bin/echo "dev-libs/xmlsec nss" >> $package_use_file && \
 /bin/echo "app-crypt/veracrypt truecrypt-3.0" >> /etc/portage/package.license && \
-/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt && \
+/usr/bin/emerge -q gui-apps/kanshi gui-apps/wl-clipboard app-text/evince gnome-extra/nm-applet app-admin/keepassxc app-crypt/veracrypt x11-misc/grsync app-office/libreoffice-bin && \
 /bin/echo "[*] Done !"
 /bin/echo "###########################################"
 
