@@ -17,6 +17,7 @@ softwares_array=(
 "sys-apps/pciutils"
 "sys-apps/hwdata"
 "dev-python/pip"
+"app-text/tree"
 )
 
 if [[ "$EUID" -ne 0 ]];
