@@ -45,8 +45,10 @@ fi
 /bin/echo "###########################################"
 
 /bin/echo "###########################################"
-/bin/echo "[*] Installing Sway"
-/usr/bin/emerge -q gui-wm/sway gui-apps/foot sys-auth/elogind && \
+/bin/echo "[*] Installing Sway and Waybar"
+/bin/echo "gui-apps/waybar network tray wifi" >> $package_use_file && \
+/bin/echo "dev-libs/libdbusmenu gtk3" >> $package_use_file && \
+/usr/bin/emerge -q gui-wm/sway gui-apps/foot sys-auth/elogind gui-apps/waybar && \
 /sbin/rc-update add elogind boot && \
 /sbin/rc-service elogind start && \
 /bin/echo "[*] Done !"
